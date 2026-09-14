@@ -9,6 +9,11 @@ npm run dev        # http://localhost:5173
 
 **Controls:** arrows move · Z / Space jump · X / C shoot · A / S switch weapon · Enter pause · M mute
 
+**Play it:** https://njgreb.github.io/seimgrman/ · every build: https://njgreb.github.io/seimgrman/builds/
+
+Every push to `main` deploys via `.github/workflows/deploy.yml`: the latest build goes to the site root and a
+copy is kept forever under `builds/<sha>/` on the `gh-pages` branch.
+
 ## Making it about *your* managers
 
 Each boss is one file in `src/bosses/`. For each one:
