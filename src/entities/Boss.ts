@@ -8,7 +8,7 @@ import type { Arena } from '../scenes/Arena';
 import type { Shot } from './Shot';
 
 // Thrown out of a pattern when the fight ends mid-attack.
-class Cancelled extends Error {}
+export class Cancelled extends Error {}
 
 export class Boss extends Phaser.Physics.Arcade.Sprite {
   declare body: Phaser.Physics.Arcade.Body;
@@ -16,11 +16,11 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   readonly maxHp: number;
   facing: 1 | -1 = -1;
   alive = true;
-  private invulnUntil = 0;
-  private shootUntil = 0;
-  private poseFrame: number | null = null;
+  protected invulnUntil = 0;
+  protected shootUntil = 0;
+  protected poseFrame: number | null = null;
   private lastPattern: BossPattern | null = null;
-  private readonly texKey: string;
+  protected readonly texKey: string;
 
   constructor(readonly arena: Arena, x: number, y: number, readonly def: BossDef) {
     super(arena, x, y, `boss-${def.id}`, FRAMES.idle);
@@ -63,6 +63,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
         this.lastPattern = pattern;
         await pattern(this);
         this.guard();
+        await this.afterPattern();
         this.pose(null);
         this.face();
         await this.wait(this.enraged ? 350 : 700);
@@ -72,8 +73,39 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  private guard(): void {
+  protected guard(): void {
     if (!this.alive || this.arena.over || !this.active) throw new Cancelled();
+  }
+
+  // ---- hooks for bosses that aren't a regular character (see ReorgMachine, Capsule) ----
+
+  // Runs after every attack pattern.
+  protected async afterPattern(): Promise<void> {}
+
+  // Arrival at the start of a fight, before the health bar fills.
+  async enter(): Promise<void> {
+    await this.waitUntil(() => this.onFloor, 8000);
+    sfx.land();
+    this.face();
+    this.pose(FRAMES.attack);
+    await this.wait(500);
+    this.pose(null);
+  }
+
+  // Whether a player shot touching this boss counts toward accuracy.
+  countsAsLanded(_shot: Shot): boolean {
+    return true;
+  }
+
+  // Bounces a player shot off armor: it stops interacting and flies away.
+  deflect(shot: Shot): void {
+    if (shot.mem.hit) return;
+    shot.mem.hit = true;
+    sfx.deflect();
+    shot.body.setVelocity(-shot.body.velocity.x * 0.8 || 120, -160);
+    shot.body.setAcceleration(0, 0);
+    shot.setAlpha(0.6);
+    this.arena.time.delayedCall(350, () => shot.active && shot.destroy());
   }
 
   // ---- helpers for pattern scripts ----
@@ -216,9 +248,11 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   preUpdate(time: number, delta: number): void {
     super.preUpdate(time, delta);
     if (!this.alive) return;
-
     this.setAlpha(time < this.invulnUntil && Math.floor(time / 40) % 2 === 0 ? 0.4 : 1);
+    this.animate(time);
+  }
 
+  protected animate(time: number): void {
     const moving = Math.abs(this.body.velocity.x) > 1;
     const shooting = time < this.shootUntil;
     if (!this.onFloor) {

@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { GAME_TITLE, HEIGHT, WIDTH } from '../config';
 import { FRAMES } from '../art/characters';
 import { sfx } from '../audio/sfx';
-import { BOSSES } from '../data/bosses';
+import { BOSSES, FINAL_BOSS } from '../data/bosses';
 import { PROMPTS, onMenu } from '../input';
 import { starfield, text } from '../ui/text';
 
@@ -37,6 +37,15 @@ export class Ending extends Phaser.Scene {
       line(boss.credit, '787878');
       y += 24;
     }
+
+    line('AND INTRODUCING', 'f83800');
+    y += 6;
+    roll.add(this.add.image(WIDTH / 2, y + 24, `portrait-${FINAL_BOSS.id}`));
+    y += 54;
+    line(FINAL_BOSS.name, 'f8d878');
+    line(`AS PLAYED BY ${FINAL_BOSS.manager}`, 'bcbcbc');
+    line(FINAL_BOSS.credit, '787878');
+    y += 24;
 
     y += 20;
     line(GAME_TITLE, '3cbcfc', 2);

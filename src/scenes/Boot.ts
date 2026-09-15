@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { createFont } from '../art/font';
-import { generateBackground, generateCharacters, generateProps, generateTiles, type Manifest } from '../art/generate';
-import { BOSSES, bossById } from '../data/bosses';
+import { generateBackground, generateCharacters, generateFinalBoss, generateProps, generateTiles, type Manifest } from '../art/generate';
+import { ALL_BOSSES, BOSSES, bossById } from '../data/bosses';
 import { progress } from '../state';
 
 // Loads any processed art listed in assets/manifest.json (written by tools/pixelize.ts),
@@ -29,7 +29,8 @@ export class Boot extends Phaser.Scene {
     createFont(this);
     generateProps(this);
     generateCharacters(this);
-    for (const boss of BOSSES) {
+    generateFinalBoss(this);
+    for (const boss of ALL_BOSSES) {
       generateTiles(this, `tile-${boss.id}`, boss.theme.tile, boss.theme.tileLight);
       generateBackground(this, `bg-${boss.id}`, boss.theme.bg, boss.theme.pattern);
     }
@@ -44,10 +45,12 @@ export class Boot extends Phaser.Scene {
       return;
     }
     if (params.get('weapons') === 'all') progress.weapons = ['buster', ...BOSSES.map((b) => b.reward)];
+    // ?boss=cto&phase=2 starts the final fight at its second phase.
     const bossId = params.get('boss');
-    if (bossId && BOSSES.some((b) => b.id === bossId)) {
+    if (bossId && ALL_BOSSES.some((b) => b.id === bossId)) {
       if (params.get('weapons') !== 'all') progress.weapons = ['buster'];
-      this.scene.start('Arena', { bossId: bossById(bossId).id });
+      const phase = Math.max(0, (Number(params.get('phase')) || 1) - 1);
+      this.scene.start('Arena', { bossId: bossById(bossId).id, phase });
       return;
     }
     this.scene.start('Title');

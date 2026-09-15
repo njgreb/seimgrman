@@ -6,6 +6,7 @@ import { Boot } from './scenes/Boot';
 import { BossIntro } from './scenes/BossIntro';
 import { BossSelect } from './scenes/BossSelect';
 import { Ending } from './scenes/Ending';
+import { Fortress } from './scenes/Fortress';
 import { Leaderboard } from './scenes/Leaderboard';
 import { NameEntry } from './scenes/NameEntry';
 import { Pause } from './scenes/Pause';
@@ -38,7 +39,7 @@ const game = new Phaser.Game({
     default: 'arcade',
     arcade: { gravity: { x: 0, y: GRAVITY }, debug: new URLSearchParams(window.location.search).has('debug') },
   },
-  scene: [Boot, Title, BossSelect, BossIntro, Arena, Pause, WeaponGet, Results, NameEntry, Leaderboard, Ending],
+  scene: [Boot, Title, BossSelect, BossIntro, Arena, Pause, WeaponGet, Fortress, Results, NameEntry, Leaderboard, Ending],
 });
 
 game.events.on(Phaser.Core.Events.PRE_STEP, pollGamepads);

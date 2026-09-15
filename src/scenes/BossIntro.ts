@@ -22,7 +22,21 @@ export class BossIntro extends Phaser.Scene {
 
   create(): void {
     this.cameras.main.setBackgroundColor('#000000');
-    this.add.rectangle(WIDTH / 2, 100, WIDTH, 112, 0x0000bc).setDepth(-2);
+    const band = this.add.rectangle(WIDTH / 2, 100, WIDTH, 112, this.def.final ? 0xa80020 : 0x0000bc).setDepth(-2);
+    if (this.def.final) {
+      // the final boss gets alarms instead of a calm blue card
+      const warning = text(this, WIDTH / 2, 20, 'WARNING', { align: 'center', scale: 2, color: 'f8d878' });
+      this.time.addEvent({
+        delay: 240,
+        loop: true,
+        callback: () => {
+          const on = band.fillColor === 0xa80020;
+          band.setFillStyle(on ? 0x500010 : 0xa80020);
+          warning.setVisible(!on);
+          if (!on) sfx.beep();
+        },
+      });
+    }
     starfield(this, 30, 120, { y: 46, h: 108 });
     void this.sequence();
     this.time.delayedCall(600, () => onMenu(this, (a) => (a === 'confirm' || a === 'start') && this.go()));

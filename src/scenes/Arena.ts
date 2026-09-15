@@ -4,9 +4,10 @@ import { FRAMES } from '../art/characters';
 import { sfx } from '../audio/sfx';
 import { bossById } from '../data/bosses';
 import type { BossDef, ShotSpec } from '../data/types';
-import { Boss } from '../entities/Boss';
+import { type Boss, Cancelled } from '../entities/Boss';
 import { Player } from '../entities/Player';
 import { Shot } from '../entities/Shot';
+import { spawnBoss } from '../entities/spawnBoss';
 import { PROMPTS, createControls, onMenu } from '../input';
 import { progress } from '../state';
 import { Hud } from '../ui/Hud';
@@ -50,13 +51,18 @@ export class Arena extends Phaser.Scene {
   private fighting = false;
   private resumedAt = 0;
   private landedVolleys = new Set<number>();
+  private phase = 0; // multi-phase fights: which phase is (or was, at game over) in progress
+  private solids: Phaser.GameObjects.Zone[] = [];
+  private bossColliders: Phaser.Physics.Arcade.Collider[] = [];
 
   constructor() {
     super('Arena');
   }
 
-  init(data: { bossId: string }): void {
+  init(data: { bossId: string; phase?: number }): void {
     this.def = bossById(data.bossId);
+    this.phase = data.phase ?? 0;
+    this.bossColliders = [];
     this.over = false;
     this.playerReady = false;
     this.fighting = false;
@@ -68,11 +74,11 @@ export class Arena extends Phaser.Scene {
     const layout = def.layout ?? DEFAULT_LAYOUT;
 
     this.add.tileSprite(0, 0, WIDTH, HEIGHT, `bg-${def.id}`).setOrigin(0);
-    const solids = solidRects(layout).map((r) => {
+    const solids = (this.solids = solidRects(layout).map((r) => {
       const zone = this.add.zone((r.x + r.w / 2) * TILE, (r.y + r.h / 2) * TILE, r.w * TILE, r.h * TILE);
       this.physics.add.existing(zone, true);
       return zone;
-    });
+    }));
     layout.forEach((row, y) => [...row].forEach((c, x) => c === '#' && this.add.image(x * TILE + 8, y * TILE + 8, `tile-${def.id}`)));
 
     this.playerShots = this.physics.add.group();
@@ -82,26 +88,11 @@ export class Arena extends Phaser.Scene {
     this.player.setVisible(false);
     this.player.body.enable = false;
 
-    this.boss = new Boss(this, WIDTH - 56, -40, def);
+    this.boss = spawnBoss(this, def, this.phase);
     this.hud = new Hud(this);
 
     this.physics.add.collider(this.player, solids);
-    this.physics.add.collider(this.boss, solids);
-
-    this.physics.add.overlap(this.playerShots, this.boss, (a, b) => {
-      const shot = (a instanceof Shot ? a : b) as Shot;
-      if (!shot.active || shot.mem.hit) return;
-      // Accuracy counts touching the boss, even during its invulnerability flicker.
-      const { volley } = shot.spec;
-      if (this.boss.alive && volley !== undefined && !this.landedVolleys.has(volley)) {
-        this.landedVolleys.add(volley);
-        progress.stats.shotsLanded++;
-      }
-      if (this.boss.takeHit(shot)) {
-        if (shot.spec.pierce) shot.mem.hit = true;
-        else shot.destroy();
-      }
-    });
+    this.wireBoss();
 
     this.physics.add.overlap(this.enemyShots, this.player, (a, b) => {
       const shot = (a instanceof Shot ? a : b) as Shot;
@@ -111,10 +102,6 @@ export class Arena extends Phaser.Scene {
         this.say(FREEZE_LINES[Math.floor(Math.random() * FREEZE_LINES.length)], this.player.x, this.player.y - 28, 1600);
       }
       if (!shot.spec.pierce) shot.destroy();
-    });
-
-    this.physics.add.overlap(this.player, this.boss, () => {
-      if (this.boss.alive) this.player.damage(CONTACT_DAMAGE, this.boss.x);
     });
 
     onMenu(this, (action) => {
@@ -137,36 +124,70 @@ export class Arena extends Phaser.Scene {
     this.player.body.enable = true;
     this.playerReady = true;
 
-    // boss drops in, flexes, health bar fills
+    // boss arrives, health bar fills
     await sleep(this, 300);
-    await new Promise<void>((resolve) => {
-      const check = () => {
-        if (this.boss.onFloor) {
-          this.events.off('update', check);
-          resolve();
+    if (!(await this.bossEnters())) return;
+    await this.fillBossBar();
+    await this.ready();
+    if (this.over) return;
+    this.startFighting();
+  }
+
+  // Colliders belong to one boss body, so a new phase re-wires them.
+  private wireBoss(): void {
+    this.bossColliders.forEach((c) => c.destroy());
+    const boss = this.boss;
+    this.bossColliders = [
+      this.physics.add.collider(boss, this.solids),
+      this.physics.add.overlap(this.playerShots, boss, (a, b) => {
+        const shot = (a instanceof Shot ? a : b) as Shot;
+        if (!shot.active || shot.mem.hit || !boss.alive) return;
+        // Accuracy counts touching the boss, even during its invulnerability flicker.
+        const { volley } = shot.spec;
+        if (volley !== undefined && boss.countsAsLanded(shot) && !this.landedVolleys.has(volley)) {
+          this.landedVolleys.add(volley);
+          progress.stats.shotsLanded++;
         }
-      };
-      this.events.on('update', check);
-    });
-    sfx.land();
-    this.boss.face();
-    this.boss.pose(FRAMES.attack);
-    await sleep(this, 500);
-    this.boss.pose(null);
+        if (boss.takeHit(shot)) {
+          if (shot.spec.pierce) shot.mem.hit = true;
+          else shot.destroy();
+        }
+      }),
+      this.physics.add.overlap(this.player, boss, () => {
+        if (boss.alive) this.player.damage(CONTACT_DAMAGE, boss.x);
+      }),
+    ];
+  }
+
+  // False if the scene ended while the boss was still arriving.
+  private async bossEnters(): Promise<boolean> {
+    try {
+      await this.boss.enter();
+      return true;
+    } catch (e) {
+      if (e instanceof Cancelled) return false;
+      throw e;
+    }
+  }
+
+  private async fillBossBar(): Promise<void> {
     for (let i = 0; i <= this.boss.maxHp; i++) {
       this.hud.bossDisplay = i;
       if (i % 2 === 0) sfx.tick();
       await sleep(this, 28);
     }
+  }
 
+  private async ready(): Promise<void> {
     const ready = text(this, WIDTH / 2, 100, 'READY', { align: 'center', depth: 50 });
     for (let i = 0; i < 6; i++) {
       ready.setVisible(!ready.visible);
       await sleep(this, 160);
     }
     ready.destroy();
+  }
 
-    if (this.over) return;
+  private startFighting(): void {
     this.fighting = true;
     this.player.controllable = true;
     this.hud.flashWeapon(`VS ${this.def.name}`);
@@ -233,10 +254,18 @@ export class Arena extends Phaser.Scene {
 
   onBossDefeated(): void {
     if (this.over) return;
+    if (this.def.phases && this.phase < this.def.phases.length - 1) {
+      void this.nextPhase();
+      return;
+    }
     this.over = true;
     this.fighting = false;
     this.player.controllable = false;
     this.enemyShots.clear(true, true);
+    if (this.def.final) {
+      void this.finale();
+      return;
+    }
     this.explode(this.boss.x, this.boss.y, 'fx-orb-boss');
     this.boss.setVisible(false);
     sfx.death();
@@ -258,6 +287,72 @@ export class Arena extends Phaser.Scene {
     this.scene.start('WeaponGet', { bossId: this.def.id });
   }
 
+  // The current body blows up and the next phase climbs out of the wreck. The fight timer pauses meanwhile.
+  private async nextPhase(): Promise<void> {
+    this.fighting = false;
+    this.player.controllable = false;
+    this.enemyShots.clear(true, true);
+    this.playerShots.clear(true, true);
+    const wreck = this.boss;
+    const bounds = wreck.getBounds();
+    sfx.death();
+    for (let i = 0; i < 7; i++) {
+      const x = Phaser.Math.Between(bounds.left, bounds.right);
+      const y = Phaser.Math.Between(bounds.top, bounds.bottom);
+      const blast = this.add.image(x, y, 'fx-orb-boss').setDepth(45).setScale(0.5);
+      this.tweens.add({ targets: blast, scale: 2.5, alpha: 0, duration: 380, onComplete: () => blast.destroy() });
+      sfx.boom();
+      this.shake();
+      await sleep(this, 200);
+    }
+    this.explode(wreck.x, wreck.y, 'fx-orb-boss');
+    const from = { x: wreck.x, y: bounds.top + 16 };
+    wreck.destroy();
+
+    this.phase++;
+    this.boss = spawnBoss(this, this.def, this.phase, from);
+    this.wireBoss();
+    this.hud.bossDisplay = 0;
+    await sleep(this, 700);
+    this.boss.say("YOU THINK THAT WAS MY FINAL FORM?", 1500);
+    await sleep(this, 1500);
+    if (!(await this.bossEnters())) return;
+    await this.fillBossBar();
+    await this.ready();
+    if (this.over) return;
+    this.startFighting();
+  }
+
+  // The Wily bow: the pilot tumbles out, lands, and begs.
+  private async finale(): Promise<void> {
+    const pod = this.boss;
+    this.explode(pod.x, pod.y, 'fx-orb-boss');
+    pod.setVisible(false);
+    sfx.death();
+    progress.defeated.add(this.def.id);
+    await sleep(this, 1400);
+
+    const pilot = this.physics.add.sprite(pod.x, pod.y, `boss-${this.def.id}`, FRAMES.hurt);
+    pilot.body.setSize(14, 26).setOffset(5, 6);
+    pilot.setFlipX(this.player.x < pilot.x);
+    this.physics.add.collider(pilot, this.solids);
+    pilot.body.setVelocityY(-140);
+    for (let t = 0; t < 3000 && !pilot.body.blocked.down; t += 50) await sleep(this, 50);
+    sfx.land();
+    pilot.body.setEnable(false);
+    pilot.setFrame(FRAMES.idle).setOrigin(0.5, 1).setY(pilot.y + 16);
+    this.tweens.add({ targets: pilot, angle: pilot.flipX ? -30 : 30, duration: 170, yoyo: true, hold: 140, repeatDelay: 180, repeat: -1 });
+
+    for (const line of ['PLEASE! I CAN EXPLAIN!', 'IT WAS AN ALIGNMENT EXERCISE!', "LET'S NOT PUT THIS IN THE RETRO..."]) {
+      this.say(line, pilot.x, pilot.y - 44, 1600);
+      await sleep(this, 1800);
+    }
+    await sleep(this, 600);
+    this.cameras.main.fadeOut(700);
+    await sleep(this, 800);
+    this.scene.start('Results');
+  }
+
   onPlayerDied(): void {
     if (this.over) return;
     this.over = true;
@@ -275,7 +370,8 @@ export class Arena extends Phaser.Scene {
     text(this, WIDTH / 2, 116, "LET'S TAKE THIS OFFLINE.", { align: 'center', depth: 91 });
     text(this, WIDTH / 2, 136, PROMPTS.gameOver, { align: 'center', depth: 91, color: 'f8d878' });
     onMenu(this, (action) => {
-      if (action === 'confirm' || action === 'start') this.scene.restart({ bossId: this.def.id });
+      // multi-phase fights retry from the phase you reached
+      if (action === 'confirm' || action === 'start') this.scene.restart({ bossId: this.def.id, phase: this.phase });
       if (action === 'back') this.scene.start('BossSelect');
     });
   }

@@ -9,8 +9,8 @@
     "sync": {
       "portrait": "assets/bosses/sync/portrait.png"
     },
-    "ticket": {
-      "portrait": "assets/bosses/ticket/portrait.png"
+    "cto": {
+      "portrait": "assets/bosses/cto/portrait.png"
     }
   }
 }

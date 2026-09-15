@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import sharp from 'sharp';
 import { FRAMES, drawFrame, drawPortrait, type HeadOverride, type Look } from '../src/art/characters.ts';
 import { PixelCanvas } from '../src/art/PixelCanvas.ts';
-import { BOSSES } from '../src/data/bosses.ts';
+import { ALL_BOSSES } from '../src/data/bosses.ts';
 import { PLAYER_LOOK } from '../src/data/weapons.ts';
 import { canvasToRaw, rawToCanvas, readRaw } from './image.ts';
 
@@ -26,7 +26,7 @@ async function main() {
   const rows: { name: string; look: Look; player: boolean; head?: HeadOverride; portrait?: PixelCanvas; imported: string[] }[] = [
     { name: 'PLAYER', look: PLAYER_LOOK, player: true, imported: [] },
   ];
-  for (const b of BOSSES) {
+  for (const b of ALL_BOSSES) {
     const headImg = await optional(`public/assets/bosses/${b.id}/head.png`);
     const portrait = await optional(`public/assets/bosses/${b.id}/portrait.png`);
     rows.push({

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { WIDTH } from '../config';
 import { FRAMES } from '../art/characters';
 import { sfx } from '../audio/sfx';
+import { FINAL_BOSS } from '../data/bosses';
 import { PROMPTS, onMenu } from '../input';
 import { LEADERBOARD_ENABLED } from '../leaderboard';
 import { formatNumber, formatTime, rankFor, scoreRun } from '../score';
@@ -34,7 +35,7 @@ export class Results extends Phaser.Scene {
 
     const title = text(this, WIDTH / 2, 14, '', { align: 'center', scale: 2, color: 'f8d878' });
     await typeOut(this, title, 'PERFORMANCE REVIEW', 40, sfx.tick);
-    text(this, WIDTH / 2, 34, 'ALL MANAGERS DEFEATED', { align: 'center', color: 'a4e4fc' });
+    text(this, WIDTH / 2, 34, `${FINAL_BOSS.name} DEFEATED`, { align: 'center', color: 'a4e4fc' });
     this.add.sprite(WIDTH / 2, 68, 'player-buster', FRAMES.shoot).setScale(1.5);
     await sleep(this, 400);
 

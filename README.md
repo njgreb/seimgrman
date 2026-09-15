@@ -37,11 +37,17 @@ Each boss is one file in `src/bosses/`. For each one:
 Add or remove bosses in `src/data/bosses.ts` (up to 8 fit the select screen). Each new boss needs a
 `reward` weapon in `src/data/weapons.ts`.
 
+**The final boss** (`src/bosses/cto.ts`, `FINAL_BOSS` in `src/data/bosses.ts`) waits at HQ until every boss above is
+beaten: an emergency all-hands invite, then a two-phase fight. Phase 1 is THE REORG MACHINE (only its cockpit
+takes damage, only while open; weak to TICKET SPLIT), phase 2 the escape pod (weak to CALENDAR BLOCK). Dying in
+phase 2 retries at phase 2. Its attacks remix the four managers' patterns, so if you swap a manager, the remix
+names in `cto.ts` are worth a look. Its portrait lives in `art/raw/cto/`.
+
 AI portraits: see [art/README.md](art/README.md).
 
 ## Dev shortcuts
 
-- `?boss=ticket` jumps straight into a fight
+- `?boss=ticket` jumps straight into a fight (`?boss=cto&phase=2` starts the final fight at phase 2)
 - `?weapons=all` gives every weapon
 - `?debug` shows physics hitboxes
 - `?results` jumps to the end-of-game score screen with sample stats

@@ -18,6 +18,16 @@ export interface BossDef {
   hp?: number;
   layout?: string[]; // 15 rows x 16 cols, '#' = solid. Defaults to a flat room.
   patterns: BossPattern[];
+  final?: boolean; // the HQ boss: unlocked once every boss in BOSSES is beaten, no weapon reward
+  phases?: PhaseDef[]; // multi-phase fights replace hp/weakness/patterns per phase
+}
+
+// One stage of a multi-phase fight. Dying restarts at the phase you reached.
+export interface PhaseDef {
+  body: 'machine' | 'capsule'; // src/entities/spawnBoss.ts picks the entity for it
+  hp?: number;
+  weakness: string;
+  patterns: BossPattern[];
 }
 
 export interface ShotSpec {

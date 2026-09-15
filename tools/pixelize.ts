@@ -14,7 +14,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { PALETTE, type RGB, colorDistance, hexToRgb, nearestIndex } from '../src/art/palette.ts';
-import { BOSSES } from '../src/data/bosses.ts';
+import { ALL_BOSSES } from '../src/data/bosses.ts';
 import { type Raw, rawToCanvas, canvasToRaw, readRaw, toSharp } from './image.ts';
 
 const RAW_DIR = 'art/raw';
@@ -220,7 +220,7 @@ async function processImage(src: string, kind: Kind, dest: string): Promise<void
 
 async function main() {
   const only = process.argv.slice(2);
-  const knownIds = new Set(BOSSES.map((b) => b.id));
+  const knownIds = new Set(ALL_BOSSES.map((b) => b.id));
   const manifest: { bosses: Record<string, Partial<Record<Kind, string>>> } = fs.existsSync(MANIFEST)
     ? JSON.parse(fs.readFileSync(MANIFEST, 'utf8'))
     : { bosses: {} };
@@ -242,6 +242,8 @@ async function main() {
     if (Object.keys(entry).length) manifest.bosses[id] = entry;
     else delete manifest.bosses[id];
   }
+  // art/raw folders that were moved or deleted (full runs only)
+  if (!only.length) for (const id of Object.keys(manifest.bosses)) if (!dirs.includes(id)) delete manifest.bosses[id];
 
   fs.writeFileSync(MANIFEST, JSON.stringify(manifest, null, 2) + '\n');
   console.log(`wrote ${MANIFEST}`);

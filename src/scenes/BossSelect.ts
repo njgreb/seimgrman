@@ -35,7 +35,7 @@ export class BossSelect extends Phaser.Scene {
     this.locked = false;
     const remaining = BOSSES.filter((b) => !progress.defeated.has(b.id));
     if (remaining.length === 0) {
-      this.scene.start('Ending');
+      this.scene.start('Fortress'); // every manager is down: on to HQ
       return;
     }
     this.cursor = BOSSES.indexOf(remaining[0]);
