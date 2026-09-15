@@ -3,8 +3,9 @@ import { GAME_TITLE, WIDTH } from '../config';
 import { FRAMES } from '../art/characters';
 import { sfx } from '../audio/sfx';
 import { BOSSES } from '../data/bosses';
-import { PROMPTS, controlsHelp, onDeviceChange, onMenu } from '../input';
+import { PROMPTS, controlsHelp, onDeviceChange, onMenu, usingButtons } from '../input';
 import { LEADERBOARD_ENABLED } from '../leaderboard';
+import { remaster } from '../remaster';
 import { progress } from '../state';
 import { starfield, text } from '../ui/text';
 
@@ -37,11 +38,29 @@ export class Title extends Phaser.Scene {
     const press = text(this, WIDTH / 2, 134, PROMPTS.start, { align: 'center', color: 'f8d878' });
     this.time.addEvent({ delay: 450, loop: true, callback: () => press.setVisible(!press.visible) });
 
+    // 16-BIT REMASTER toggle (R on keyboards, SELECT on touch and controllers)
+    const badge = text(this, WIDTH / 2, 147, 'NOW IN 16-BIT!', { align: 'center', color: 'f83800' });
+    this.tweens.add({ targets: badge, scale: 1.15, duration: 300, yoyo: true, repeat: -1 });
+    const toggleLine = text(this, WIDTH / 2, 226, '', { align: 'center' });
+    const showRemaster = () => {
+      badge.setVisible(remaster.enabled);
+      const label = `${usingButtons() ? 'SELECT' : 'R'}: 16-BIT REMASTER ${remaster.enabled ? 'ON' : 'OFF'}`;
+      toggleLine.setText(label).setTint(remaster.enabled ? 0xf8d878 : 0x787878);
+    };
+    const toggleRemaster = () => {
+      remaster.toggle();
+      if (remaster.enabled) sfx.jingle();
+      else sfx.cursor();
+      showRemaster();
+    };
+    this.input.keyboard!.on('keydown-R', toggleRemaster);
+
     let help: Phaser.GameObjects.BitmapText[] = [];
     const showHelp = () => {
       help.forEach((t) => t.destroy());
       help = controlsHelp().map((line, i) => text(this, WIDTH / 2, 164 + i * 11, line, { align: 'center', color: 'bcbcbc' }));
       press.setText(PROMPTS.start);
+      showRemaster();
     };
     showHelp();
     onDeviceChange(this, showHelp);
@@ -57,6 +76,7 @@ export class Title extends Phaser.Scene {
 
     onMenu(this, (action) => {
       resetIdle();
+      if (action === 'select') toggleRemaster();
       if (action === 'start' || action === 'confirm') {
         sfx.select();
         this.scene.start('BossSelect');

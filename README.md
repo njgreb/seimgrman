@@ -46,6 +46,10 @@ patterns, so if you swap a manager, the remix names in `cto.ts` are worth a look
 
 AI portraits: see [art/README.md](art/README.md).
 
+**16-BIT REMASTER:** `npm run art` also makes a 96x96, 32-color `portrait16.png` per boss (no NES palette lock).
+Toggle it on the title screen (R, or SELECT on touch and controllers; `?remaster` works too) and the boss intro,
+the HQ video call and the credits use it. The setting is remembered per device.
+
 ## Dev shortcuts
 
 - `?boss=ticket` jumps straight into a fight (`?boss=cto&phase=2` starts the final fight at phase 2)

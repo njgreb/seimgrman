@@ -4,6 +4,7 @@ import { FRAMES } from '../art/characters';
 import { sfx } from '../audio/sfx';
 import { BOSSES, FINAL_BOSS } from '../data/bosses';
 import { PROMPTS, onMenu } from '../input';
+import { remaster } from '../remaster';
 import { progress } from '../state';
 import { starfield, text } from '../ui/text';
 
@@ -23,6 +24,16 @@ export class Ending extends Phaser.Scene {
       roll.add(text(this, WIDTH / 2, y, s, { align: 'center', color, scale }));
       y += 10 * scale + 4;
     };
+    const portrait = (id: string) => {
+      const hd = `portrait16-${id}`;
+      if (remaster.enabled && this.textures.exists(hd)) {
+        roll.add(this.add.image(WIDTH / 2, y + 48, hd));
+        y += 102;
+      } else {
+        roll.add(this.add.image(WIDTH / 2, y + 24, `portrait-${id}`));
+        y += 54;
+      }
+    };
 
     line('ALL MANAGERS', 'f8d878', 2);
     line('DEFEATED!', 'f8d878', 2);
@@ -31,8 +42,7 @@ export class Ending extends Phaser.Scene {
     y += 30;
 
     for (const boss of BOSSES) {
-      roll.add(this.add.image(WIDTH / 2, y + 24, `portrait-${boss.id}`));
-      y += 54;
+      portrait(boss.id);
       line(boss.name, 'f8f8f8');
       line(`AS PLAYED BY ${boss.manager}`, 'bcbcbc');
       line(boss.credit, '787878');
@@ -41,8 +51,7 @@ export class Ending extends Phaser.Scene {
 
     line('AND INTRODUCING', 'f83800');
     y += 6;
-    roll.add(this.add.image(WIDTH / 2, y + 24, `portrait-${FINAL_BOSS.id}`));
-    y += 54;
+    portrait(FINAL_BOSS.id);
     line(FINAL_BOSS.name, 'f8d878');
     line(`AS PLAYED BY ${FINAL_BOSS.manager}`, 'bcbcbc');
     line(FINAL_BOSS.credit, '787878');

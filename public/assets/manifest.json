@@ -1,19 +1,24 @@
 {
   "bosses": {
     "oncall": {
-      "portrait": "assets/bosses/oncall/portrait.png"
+      "portrait": "assets/bosses/oncall/portrait.png",
+      "portrait16": "assets/bosses/oncall/portrait16.png"
     },
     "roadmap": {
-      "portrait": "assets/bosses/roadmap/portrait.png"
+      "portrait": "assets/bosses/roadmap/portrait.png",
+      "portrait16": "assets/bosses/roadmap/portrait16.png"
     },
     "sync": {
-      "portrait": "assets/bosses/sync/portrait.png"
+      "portrait": "assets/bosses/sync/portrait.png",
+      "portrait16": "assets/bosses/sync/portrait16.png"
     },
     "cto": {
-      "portrait": "assets/bosses/cto/portrait.png"
+      "portrait": "assets/bosses/cto/portrait.png",
+      "portrait16": "assets/bosses/cto/portrait16.png"
     },
     "ticket": {
-      "portrait": "assets/bosses/ticket/portrait.png"
+      "portrait": "assets/bosses/ticket/portrait.png",
+      "portrait16": "assets/bosses/ticket/portrait16.png"
     }
   }
 }

@@ -5,6 +5,7 @@ import { sfx } from '../audio/sfx';
 import { bossById } from '../data/bosses';
 import type { BossDef } from '../data/types';
 import { onMenu } from '../input';
+import { bigPortrait } from '../remaster';
 import { sleep, starfield, text, typeOut } from '../ui/text';
 
 export class BossIntro extends Phaser.Scene {
@@ -46,7 +47,7 @@ export class BossIntro extends Phaser.Scene {
     const { def } = this;
     sfx.jingle();
 
-    const portrait = this.add.image(-60, 100, `portrait-${def.id}`).setScale(2);
+    const portrait = bigPortrait(this, -60, 100, def.id);
     this.tweens.add({ targets: portrait, x: 72, duration: 350, ease: 'Cubic.easeOut' });
 
     const sprite = this.add.sprite(184, -40, `boss-${def.id}`, FRAMES.jump).setScale(3).setFlipX(true);

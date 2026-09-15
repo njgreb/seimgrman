@@ -3,6 +3,7 @@ import { HEIGHT, WIDTH } from '../config';
 import { sfx } from '../audio/sfx';
 import { FINAL_BOSS } from '../data/bosses';
 import { PROMPTS, onMenu } from '../input';
+import { bigPortrait } from '../remaster';
 import { sleep, starfield, text, typeOut } from '../ui/text';
 
 // The Wily castle moment: after the last manager, an emergency all-hands invite, a video call from the
@@ -54,15 +55,15 @@ export class Fortress extends Phaser.Scene {
     await sleep(this, 700);
 
     // he joins the call
-    add(this.add.rectangle(56, 130, 54, 54, 0x000000).setStrokeStyle(2, 0xa80020));
-    const portrait = add(this.add.image(56, 130, `portrait-${boss.id}`).setAlpha(0));
+    add(this.add.rectangle(62, 156, 100, 100, 0x000000).setStrokeStyle(2, 0xa80020));
+    const portrait = add(bigPortrait(this, 62, 156, boss.id).setAlpha(0));
     this.tweens.add({ targets: portrait, alpha: 1, duration: 300 });
-    add(text(this, 56, 160, boss.name, { align: 'center', color: 'f83800' }));
+    add(text(this, 62, 212, boss.name, { align: 'center', color: 'f83800' }));
     sfx.teleport();
     await sleep(this, 400);
-    const line1 = add(text(this, 94, 116, '', { color: 'f8f8f8' }));
+    const line1 = add(text(this, 122, 142, '', { color: 'f8f8f8' }));
     await typeOut(this, line1, `"WE'RE MAKING`, 45, sfx.tick);
-    const line2 = add(text(this, 94, 128, '', { color: 'f8f8f8' }));
+    const line2 = add(text(this, 122, 154, '', { color: 'f8f8f8' }));
     await typeOut(this, line2, `SOME CHANGES."`, 45, sfx.tick);
     await sleep(this, 1400);
 

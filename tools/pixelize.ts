@@ -1,6 +1,7 @@
 // Turns AI-generated (or any) images into palette-locked game sprites.
 //
-//   art/raw/<boss-id>/portrait.png  ->  public/assets/bosses/<boss-id>/portrait.png  (48x48)
+//   art/raw/<boss-id>/portrait.png  ->  public/assets/bosses/<boss-id>/portrait.png    (48x48, NES palette)
+//                                   ->  public/assets/bosses/<boss-id>/portrait16.png  (96x96, 32 free colors: 16-BIT REMASTER)
 //   art/raw/<boss-id>/head.png      ->  public/assets/bosses/<boss-id>/head.png      (16x16, facing right)
 //
 // Steps: remove flat background (+ defringe) -> crop to subject -> area-average downscale ->
@@ -22,8 +23,9 @@ const OUT_DIR = 'public/assets/bosses';
 const MANIFEST = 'public/assets/manifest.json';
 
 const TARGETS = {
-  portrait: { size: 48, maxColors: 16 },
-  head: { size: 16, maxColors: 8 },
+  portrait: { size: 48, maxColors: 16, paletteLocked: true },
+  portrait16: { size: 96, maxColors: 32, paletteLocked: false },
+  head: { size: 16, maxColors: 8, paletteLocked: true },
 } as const;
 type Kind = keyof typeof TARGETS;
 
@@ -159,8 +161,8 @@ function clusterColors(pixels: RGB[], k: number): RGB[] {
 }
 
 // Cluster to maxColors, snap each cluster to the palette, then merge the rarest colors into
-// their nearest surviving neighbor if snapping still left too many.
-function quantize(img: Raw, maxColors: number): Raw {
+// their nearest surviving neighbor if snapping still left too many. Unlocked (16-bit) art keeps the cluster colors.
+function quantize(img: Raw, maxColors: number, paletteLocked: boolean): Raw {
   const palette = PALETTE.map(hexToRgb);
   const n = img.width * img.height;
   const idx = new Int16Array(n).fill(-1);
@@ -168,6 +170,15 @@ function quantize(img: Raw, maxColors: number): Raw {
   const opaque: RGB[] = [];
   for (let i = 0; i < n; i++) if (img.data[i * 4 + 3] >= 128) opaque.push([img.data[i * 4], img.data[i * 4 + 1], img.data[i * 4 + 2]]);
   const centers = clusterColors(opaque, maxColors);
+  if (!paletteLocked) {
+    const out = Buffer.alloc(n * 4);
+    for (let i = 0; i < n; i++) {
+      if (img.data[i * 4 + 3] < 128) continue;
+      const c = centers[nearestIndex([img.data[i * 4], img.data[i * 4 + 1], img.data[i * 4 + 2]], centers)];
+      out.set([...c.map(Math.round), 255], i * 4);
+    }
+    return { data: out, width: img.width, height: img.height };
+  }
   const snapped = centers.map((c) => nearestIndex(c, palette));
   for (let i = 0; i < n; i++) {
     if (img.data[i * 4 + 3] < 128) continue;
@@ -188,7 +199,7 @@ function quantize(img: Raw, maxColors: number): Raw {
   return { data: out, width: img.width, height: img.height };
 }
 
-function verify(img: Raw, file: string): number {
+function verify(img: Raw, file: string, paletteLocked: boolean): number {
   const allowed = new Set(PALETTE.map((h) => h.toLowerCase()));
   const used = new Set<string>();
   for (let i = 0; i < img.width * img.height; i++) {
@@ -196,23 +207,23 @@ function verify(img: Raw, file: string): number {
     if (a !== 0 && a !== 255) throw new Error(`${file}: semi-transparent pixel`);
     if (a === 0) continue;
     const hex = [0, 1, 2].map((k) => img.data[i * 4 + k].toString(16).padStart(2, '0')).join('');
-    if (!allowed.has(hex)) throw new Error(`${file}: off-palette color #${hex}`);
+    if (paletteLocked && !allowed.has(hex)) throw new Error(`${file}: off-palette color #${hex}`);
     used.add(hex);
   }
   return used.size;
 }
 
 async function processImage(src: string, kind: Kind, dest: string): Promise<void> {
-  const { size, maxColors } = TARGETS[kind];
+  const { size, maxColors, paletteLocked } = TARGETS[kind];
   const img = await readRaw(src);
   const removed = removeBackground(img);
   const bounds = opaqueBounds(img);
   // leave a 1px border so the outline fits
-  const small = areaDownscale(img, bounds, size - 2, kind === 'portrait');
+  const small = areaDownscale(img, bounds, size - 2, kind !== 'head');
   const padded = await toSharp(small).extend({ top: 1, bottom: 1, left: 1, right: 1, background: { r: 0, g: 0, b: 0, alpha: 0 } }).raw().toBuffer();
-  const quantizedRaw = quantize({ data: padded, width: size, height: size }, maxColors);
+  const quantizedRaw = quantize({ data: padded, width: size, height: size }, maxColors, paletteLocked);
   const quantized = canvasToRaw(rawToCanvas(quantizedRaw).outline());
-  const colors = verify(quantized, dest);
+  const colors = verify(quantized, dest, paletteLocked);
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   await toSharp(quantized).png().toFile(dest);
   console.log(`  ${kind}: ${src} -> ${dest} (${colors} colors${removed ? `, removed ${removed} bg px` : ''})`);
@@ -235,9 +246,12 @@ async function main() {
     for (const file of fs.readdirSync(path.join(RAW_DIR, id))) {
       const m = file.match(/^(portrait|head)\.(png|jpe?g|webp)$/i);
       if (!m) continue;
-      const kind = m[1].toLowerCase() as Kind;
-      await processImage(path.join(RAW_DIR, id, file), kind, path.join(OUT_DIR, id, `${kind}.png`));
-      entry[kind] = `assets/bosses/${id}/${kind}.png`;
+      const source = m[1].toLowerCase() as 'portrait' | 'head';
+      // every portrait also gets its 16-BIT REMASTER version
+      for (const kind of source === 'portrait' ? (['portrait', 'portrait16'] as const) : ([source] as const)) {
+        await processImage(path.join(RAW_DIR, id, file), kind, path.join(OUT_DIR, id, `${kind}.png`));
+        entry[kind] = `assets/bosses/${id}/${kind}.png`;
+      }
     }
     if (Object.keys(entry).length) manifest.bosses[id] = entry;
     else delete manifest.bosses[id];

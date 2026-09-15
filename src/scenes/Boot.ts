@@ -19,6 +19,7 @@ export class Boot extends Phaser.Scene {
     const manifest: Manifest = this.cache.json.get('manifest') ?? { bosses: {} };
     for (const [id, files] of Object.entries(manifest.bosses ?? {})) {
       if (files.portrait) this.load.image(`raw-portrait-${id}`, files.portrait);
+      if (files.portrait16) this.load.image(`portrait16-${id}`, files.portrait16);
       if (files.head) this.load.image(`raw-head-${id}`, files.head);
     }
     this.load.once('complete', () => this.finish());

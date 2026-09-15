@@ -6,7 +6,7 @@ import { ALL_BOSSES, FINAL_BOSS } from '../data/bosses';
 import { PLAYER_LOOK, WEAPONS } from '../data/weapons';
 
 export interface Manifest {
-  bosses: Record<string, { portrait?: string; head?: string }>;
+  bosses: Record<string, { portrait?: string; portrait16?: string; head?: string }>;
 }
 
 function addCanvasTexture(scene: Phaser.Scene, key: string, pc: PixelCanvas): void {
