@@ -4,8 +4,11 @@ import { FRAMES } from '../art/characters';
 import { sfx } from '../audio/sfx';
 import { BOSSES } from '../data/bosses';
 import { PROMPTS, controlsHelp, onDeviceChange, onMenu } from '../input';
+import { LEADERBOARD_ENABLED } from '../leaderboard';
 import { progress } from '../state';
 import { starfield, text } from '../ui/text';
+
+const IDLE_MS = 10_000;
 
 export class Title extends Phaser.Scene {
   constructor() {
@@ -43,7 +46,17 @@ export class Title extends Phaser.Scene {
     showHelp();
     onDeviceChange(this, showHelp);
 
+    // Sit idle and the high scores take a turn, like an arcade cabinet.
+    let idle: Phaser.Time.TimerEvent | undefined;
+    const resetIdle = () => {
+      idle?.remove();
+      if (LEADERBOARD_ENABLED) idle = this.time.delayedCall(IDLE_MS, () => this.scene.start('Leaderboard', { mode: 'attract' }));
+    };
+    resetIdle();
+    this.input.keyboard!.on('keydown', resetIdle);
+
     onMenu(this, (action) => {
+      resetIdle();
       if (action === 'start' || action === 'confirm') {
         sfx.select();
         this.scene.start('BossSelect');

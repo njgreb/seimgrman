@@ -3,6 +3,7 @@ import { WIDTH } from '../config';
 import { FRAMES } from '../art/characters';
 import { sfx } from '../audio/sfx';
 import { PROMPTS, onMenu } from '../input';
+import { LEADERBOARD_ENABLED } from '../leaderboard';
 import { formatNumber, formatTime, rankFor, scoreRun } from '../score';
 import { progress } from '../state';
 import { sleep, starfield, text, typeOut } from '../ui/text';
@@ -22,7 +23,7 @@ export class Results extends Phaser.Scene {
     onMenu(this, (a) => {
       if (this.done && (a === 'start' || a === 'confirm')) {
         sfx.select();
-        this.scene.start('Ending');
+        this.scene.start(LEADERBOARD_ENABLED ? 'NameEntry' : 'Ending');
       }
     });
     void this.tally();

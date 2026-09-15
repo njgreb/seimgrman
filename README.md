@@ -45,6 +45,7 @@ AI portraits: see [art/README.md](art/README.md).
 - `?weapons=all` gives every weapon
 - `?debug` shows physics hitboxes
 - `?results` jumps to the end-of-game score screen with sample stats
+- `?initials` / `?scores` jump to name entry / the high score board (needs a leaderboard server, below)
 - In dev, `window.game` is the Phaser game (e.g. `game.scene.getScene('Arena').boss.hp = 1`)
 
 ## Tuning
@@ -64,8 +65,31 @@ including lost attempts, so retries cost you:
 | Hits taken | 1,000 per hit under 30 (30,000) |
 | Clear bonus | 10,000 |
 
-The weights live in `src/config.ts` (`SCORE_*`), the math in `src/score.ts`. `scoreRun()` returns plain numbers,
-ready to send to a leaderboard.
+The weights live in `src/config.ts` (`SCORE_*`), the math in `src/score.ts`. The leaderboard server uses the
+same file, so it scores every run itself and never trusts a submitted total.
+
+## Leaderboard
+
+After the review screen, players enter 3 initials and see the top 10. The title screen shows the board after
+10 idle seconds. The game talks to `server/` (Node + Postgres on Railway) and only turns the leaderboard on when
+the build sets `VITE_LEADERBOARD_URL`.
+
+**Railway setup (once):**
+
+1. New project → add **PostgreSQL**.
+2. Add a service from this GitHub repo. Leave the root directory as the repo root: `railway.json` points the
+   build at `server/Dockerfile` and only redeploys when `server/`, `src/score.ts` or `src/config.ts` change.
+3. Service variables: `DATABASE_URL` = `${{Postgres.DATABASE_URL}}`, `ADMIN_TOKEN` = a long random string.
+   Optional: `SEASON` (default `1`; change it to start a fresh board), `ALLOWED_ORIGINS` (default
+   `https://njgreb.github.io,http://localhost:5173`), `RATE_LIMIT_PER_MIN` (default 10 per IP).
+4. Settings → Networking → **Generate Domain**, then point the game at it and redeploy the site:
+   `gh variable set LEADERBOARD_URL --body https://<domain>` and `gh workflow run deploy.yml`.
+
+**Removing a score:** `curl -X DELETE https://<domain>/scores/<id> -H "Authorization: Bearer $ADMIN_TOKEN"`
+(ids are in the `GET /scores` response and the service logs).
+
+**Local dev:** `npm install --prefix server && npm run dev --prefix server` (no `DATABASE_URL` = in-memory
+database), then `VITE_LEADERBOARD_URL=http://localhost:8787 npm run dev`.
 
 ## Shipping it
 

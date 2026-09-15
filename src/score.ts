@@ -5,7 +5,7 @@ import {
   SCORE_PER_HIT_AVOIDED,
   SCORE_PER_SECOND_SAVED,
   SCORE_TIME_LIMIT_S,
-} from './config';
+} from './config.ts';
 
 // Stats for one run. They add up across every fight, including lost attempts,
 // so a retry costs time, shots and hits. Plain numbers, ready to send to a leaderboard.
@@ -53,3 +53,8 @@ export function formatTime(ms: number): string {
   const s = Math.floor(ms / 1000);
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
+
+// Leaderboard initials: three letters, classic arcade style. Shared by the name entry screen and the server.
+export const INITIALS_PATTERN = /^[A-Z]{3}$/;
+const BLOCKED_INITIALS = new Set(['ASS', 'CUM', 'DIK', 'FAG', 'FCK', 'FUC', 'FUK', 'JIZ', 'KKK', 'NIG', 'SEX', 'SHT', 'TIT', 'WTF', 'CNT', 'DIC', 'FKU', 'POO', 'PEE']);
+export const initialsAllowed = (initials: string): boolean => INITIALS_PATTERN.test(initials) && !BLOCKED_INITIALS.has(initials);

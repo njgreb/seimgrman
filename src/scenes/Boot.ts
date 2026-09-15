@@ -35,11 +35,12 @@ export class Boot extends Phaser.Scene {
     }
 
     // Dev shortcuts: ?boss=<id> jumps into a fight, ?weapons=all grants every weapon,
-    // ?results shows the score screen with sample stats.
+    // ?results / ?initials show the score and name entry screens with sample stats, ?scores the high score board.
     const params = new URLSearchParams(window.location.search);
-    if (params.has('results')) {
+    for (const [param, scene] of [['results', 'Results'], ['initials', 'NameEntry'], ['scores', 'Leaderboard']]) {
+      if (!params.has(param)) continue;
       progress.stats = { fightMs: 252_400, shots: 131, shotsLanded: 83, hitsTaken: 9 };
-      this.scene.start('Results');
+      this.scene.start(scene, { mode: 'after' });
       return;
     }
     if (params.get('weapons') === 'all') progress.weapons = ['buster', ...BOSSES.map((b) => b.reward)];

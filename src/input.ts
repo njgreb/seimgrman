@@ -39,6 +39,9 @@ const PROMPT_TEXT: Record<Device, typeof PAD_PROMPTS> = {
 
 export const controlsHelp = (): string[] => HELP[device];
 
+// True when the player is on touch or a controller (so there are no letter keys to type with).
+export const usingButtons = (): boolean => device !== 'keyboard';
+
 // On-screen prompts that name a button. Read when the text is created.
 export const PROMPTS = {
   get start() {
@@ -145,12 +148,15 @@ const BUTTON_MENU: Record<Button, MenuAction | undefined> = {
   r: undefined,
 };
 
-export function onMenu(scene: Phaser.Scene, handler: (action: MenuAction) => void): void {
-  scene.input.keyboard!.on('keydown', (e: KeyboardEvent) => {
-    if (e.repeat) return;
-    const action = MENU_KEYS[e.code];
-    if (action) handler(action);
-  });
+// `keyboard: false` leaves the keyboard to the scene (name entry, where Z and X are letters).
+export function onMenu(scene: Phaser.Scene, handler: (action: MenuAction) => void, { keyboard = true } = {}): void {
+  if (keyboard) {
+    scene.input.keyboard!.on('keydown', (e: KeyboardEvent) => {
+      if (e.repeat) return;
+      const action = MENU_KEYS[e.code];
+      if (action) handler(action);
+    });
+  }
   onButtonPress(scene, (button) => {
     const action = BUTTON_MENU[button];
     if (action) handler(action);
