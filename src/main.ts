@@ -45,6 +45,8 @@ const rezoom = () => requestAnimationFrame(() => game.scale.setZoom(zoom()));
 window.addEventListener('resize', rezoom);
 window.addEventListener('orientationchange', rezoom);
 window.visualViewport?.addEventListener('resize', rezoom);
+// the screen area also changes size when the on-screen controller hides or shows
+new ResizeObserver(rezoom).observe(document.getElementById('screen')!);
 window.addEventListener('keydown', (e) => {
   if (e.code === 'KeyM') sfx.toggleMute();
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();

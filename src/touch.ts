@@ -85,9 +85,21 @@ export function mountTouchControls(app: HTMLElement): void {
     if (pressed.length && 'vibrate' in navigator) navigator.vibrate(8);
   };
 
+  // A physical controller hides the on-screen one; touching the screen brings it back.
+  const setHidden = (hidden: boolean) => {
+    if (document.body.classList.contains('pad-hidden') === hidden) return;
+    document.body.classList.toggle('pad-hidden', hidden);
+    release();
+  };
+  buttons.onPress((_, source) => source === 'gamepad' && setHidden(true));
+
   const onDown = (e: PointerEvent) => {
     e.preventDefault();
     sfx.unlock(); // browsers only allow audio to start from a user gesture
+    if (document.body.classList.contains('pad-hidden')) {
+      setHidden(false); // this touch only reveals the controls, it doesn't press anything
+      return;
+    }
     if (mute.contains(e.target as Node)) {
       mute.classList.toggle('off', sfx.toggleMute());
       return;
@@ -108,10 +120,10 @@ export function mountTouchControls(app: HTMLElement): void {
     if (!pointers.delete(e.pointerId)) return;
     refresh();
   };
-  const release = () => {
+  function release() {
     pointers.clear();
     refresh();
-  };
+  }
 
   window.addEventListener('pointerdown', onDown, { passive: false });
   window.addEventListener('pointermove', onMove, { passive: false });

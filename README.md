@@ -14,7 +14,8 @@ SELECT quit from pause). Add `?touch` to force it on in a desktop browser. "Add 
 
 **Controllers** (Xbox, PlayStation, Switch Pro, 8BitDo...) work too: D-pad or left stick move, A jump, B / X shoot,
 LB / RB (or triggers) switch weapon, START pause, SELECT quit from pause. On-screen prompts follow whichever
-device you used last. Browsers only reveal a controller after you press one of its buttons.
+device you used last. Browsers only reveal a controller after you press one of its buttons. On a phone, using a
+controller hides the on-screen one; touch the screen to bring it back.
 
 **Play it:** https://njgreb.github.io/seimgrman/ · every build: https://njgreb.github.io/seimgrman/builds/
 

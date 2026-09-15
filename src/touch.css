@@ -183,3 +183,9 @@ button {
   .pad-left .pad-shoulder,
   .pad-right .pad-shoulder { margin: 0; }
 }
+
+/* a physical controller is in use: just the game, full screen */
+body.touch.pad-hidden { background: #000; }
+body.touch.pad-hidden .pad-side { display: none; }
+body.touch.pad-hidden #app { grid-template: 'screen' 1fr / 1fr; }
+body.touch.pad-hidden #screen { width: 100%; height: 100%; max-height: none; aspect-ratio: auto; }
