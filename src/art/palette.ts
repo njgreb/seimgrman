@@ -12,7 +12,7 @@ const NES = [
   '000000', '101010', '383838',
 ];
 
-const SKIN = ['ffdbac', 'f1c27d', 'e0ac69', 'c68642', '8d5524', '5c3317', 'd9a67e', 'b07850', '6e4020', '3f2410'];
+const SKIN = ['ffdbac', 'f1c27d', 'e0ac69', 'c68642', '8d5524', '5c3317', 'd9a67e', 'b07850', '6e4020', '3f2410', 'eca47c', 'd4865c'];
 const HAIR = ['1c1410', '2b1b0e', '4a3020', '6a4e2e', 'a87848', 'e8d090', 'd0d0d0', '909090', 'b04020', '5a5a6a'];
 
 export const PALETTE: string[] = [...new Set([...NES, ...SKIN, ...HAIR])];

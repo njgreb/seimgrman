@@ -1,3 +1,16 @@
 {
-  "bosses": {}
+  "bosses": {
+    "oncall": {
+      "portrait": "assets/bosses/oncall/portrait.png"
+    },
+    "roadmap": {
+      "portrait": "assets/bosses/roadmap/portrait.png"
+    },
+    "sync": {
+      "portrait": "assets/bosses/sync/portrait.png"
+    },
+    "ticket": {
+      "portrait": "assets/bosses/ticket/portrait.png"
+    }
+  }
 }

@@ -38,8 +38,11 @@ function removeBackground(img: Raw): number {
   const corners = [px(0, 0), px(width - 1, 0), px(0, height - 1), px(width - 1, height - 1)];
   const alphaCorners = [0, width - 1, (height - 1) * width, height * width - 1].map((i) => data[i * 4 + 3]);
   if (alphaCorners.every((a) => a < 128)) return 0; // already transparent
-  const bg = corners[0];
-  if (!corners.every((c) => colorDistance(c, bg) < BG_TOLERANCE)) {
+  // Background = the color most corners agree on. Shoulders often run off the bottom corners,
+  // so two matching corners are enough.
+  const agreeing = (c: RGB) => corners.filter((o) => colorDistance(c, o) < BG_TOLERANCE).length;
+  const bg = corners.reduce((best, c) => (agreeing(c) > agreeing(best) ? c : best));
+  if (agreeing(bg) < 2) {
     console.warn('    corners differ; not removing background (use a plain background or a transparent PNG)');
     return 0;
   }
@@ -127,15 +130,48 @@ function opaqueBounds({ data, width, height }: Raw) {
   return { left: minX, top: minY, width: maxX - minX + 1, height: maxY - minY + 1 };
 }
 
-// Snap to palette, then merge the rarest colors into their nearest surviving neighbor.
+// Group similar colors (k-means), so detailed shading collapses into a few tones before snapping.
+// Snapping pixels one by one makes skin flicker between neighboring palette colors.
+function clusterColors(pixels: RGB[], k: number): RGB[] {
+  // deterministic farthest-point init, starting from the most common-ish color (the first pixel's nearest mean)
+  const centers: RGB[] = [pixels[0]];
+  while (centers.length < Math.min(k, pixels.length)) {
+    let far = pixels[0];
+    let farD = -1;
+    for (const p of pixels) {
+      const d = Math.min(...centers.map((c) => colorDistance(p, c)));
+      if (d > farD) (farD = d), (far = p);
+    }
+    if (farD <= 0) break;
+    centers.push(far);
+  }
+  for (let iter = 0; iter < 12; iter++) {
+    const sums = centers.map(() => [0, 0, 0, 0]);
+    for (const p of pixels) {
+      const s = sums[nearestIndex(p, centers)];
+      (s[0] += p[0]), (s[1] += p[1]), (s[2] += p[2]), s[3]++;
+    }
+    sums.forEach((s, i) => {
+      if (s[3]) centers[i] = [s[0] / s[3], s[1] / s[3], s[2] / s[3]];
+    });
+  }
+  return centers;
+}
+
+// Cluster to maxColors, snap each cluster to the palette, then merge the rarest colors into
+// their nearest surviving neighbor if snapping still left too many.
 function quantize(img: Raw, maxColors: number): Raw {
   const palette = PALETTE.map(hexToRgb);
   const n = img.width * img.height;
   const idx = new Int16Array(n).fill(-1);
   const counts = new Map<number, number>();
+  const opaque: RGB[] = [];
+  for (let i = 0; i < n; i++) if (img.data[i * 4 + 3] >= 128) opaque.push([img.data[i * 4], img.data[i * 4 + 1], img.data[i * 4 + 2]]);
+  const centers = clusterColors(opaque, maxColors);
+  const snapped = centers.map((c) => nearestIndex(c, palette));
   for (let i = 0; i < n; i++) {
     if (img.data[i * 4 + 3] < 128) continue;
-    const p = nearestIndex([img.data[i * 4], img.data[i * 4 + 1], img.data[i * 4 + 2]], palette);
+    const p = snapped[nearestIndex([img.data[i * 4], img.data[i * 4 + 1], img.data[i * 4 + 2]], centers)];
     idx[i] = p;
     counts.set(p, (counts.get(p) ?? 0) + 1);
   }
