@@ -4,6 +4,7 @@ import { FRAMES } from '../art/characters';
 import { sfx } from '../audio/sfx';
 import { BOSSES, FINAL_BOSS } from '../data/bosses';
 import { PROMPTS, onMenu } from '../input';
+import { progress } from '../state';
 import { starfield, text } from '../ui/text';
 
 export class Ending extends Phaser.Scene {
@@ -26,7 +27,7 @@ export class Ending extends Phaser.Scene {
     line('ALL MANAGERS', 'f8d878', 2);
     line('DEFEATED!', 'f8d878', 2);
     y += 16;
-    line('YOUR CALENDAR IS FINALLY FREE.', 'a4e4fc');
+    line(progress.stats.finalBossDefeated ? 'YOUR CALENDAR IS FINALLY FREE.' : 'THE REORG WENT AHEAD ANYWAY.', 'a4e4fc');
     y += 30;
 
     for (const boss of BOSSES) {

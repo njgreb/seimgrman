@@ -24,7 +24,7 @@ export class Results extends Phaser.Scene {
     onMenu(this, (a) => {
       if (this.done && (a === 'start' || a === 'confirm')) {
         sfx.select();
-        this.scene.start(LEADERBOARD_ENABLED ? 'NameEntry' : 'Ending');
+        this.scene.start(LEADERBOARD_ENABLED && !progress.practice ? 'NameEntry' : 'Ending');
       }
     });
     void this.tally();
@@ -35,8 +35,9 @@ export class Results extends Phaser.Scene {
 
     const title = text(this, WIDTH / 2, 14, '', { align: 'center', scale: 2, color: 'f8d878' });
     await typeOut(this, title, 'PERFORMANCE REVIEW', 40, sfx.tick);
-    text(this, WIDTH / 2, 34, `${FINAL_BOSS.name} DEFEATED`, { align: 'center', color: 'a4e4fc' });
-    this.add.sprite(WIDTH / 2, 68, 'player-buster', FRAMES.shoot).setScale(1.5);
+    const won = score.finalBossDefeated;
+    text(this, WIDTH / 2, 34, won ? `${FINAL_BOSS.name} DEFEATED` : "YOU'VE BEEN REORGED", { align: 'center', color: won ? 'a4e4fc' : 'f87858' });
+    this.add.sprite(WIDTH / 2, 66, 'player-buster', won ? FRAMES.shoot : FRAMES.hurt).setScale(1.5);
     await sleep(this, 400);
 
     const rows: [string, string, number][] = [
@@ -44,8 +45,9 @@ export class Results extends Phaser.Scene {
       ['ACCURACY', `${Math.round(score.accuracy * 100)}%`, score.accuracyBonus],
       ['HITS TAKEN', String(score.hitsTaken), score.hitBonus],
       ['CLEAR BONUS', '', score.clearBonus],
+      [FINAL_BOSS.name, won ? 'BEATEN' : 'LOST', score.finalBossBonus],
     ];
-    let y = 100;
+    let y = 94;
     let running = 0;
     const total = text(this, WIDTH - 16, 170, '0', { align: 'right', scale: 2, color: 'f8f8f8' });
     text(this, 16, 174, 'SCORE', { color: 'f8d878' });
@@ -62,12 +64,12 @@ export class Results extends Phaser.Scene {
       y += 14;
       await sleep(this, 250);
     }
-    const line = this.add.graphics().fillStyle(0x787878).fillRect(16, 162, WIDTH - 32, 1);
+    const line = this.add.graphics().fillStyle(0x787878).fillRect(16, 164, WIDTH - 32, 1);
     line.setDepth(1);
 
     await sleep(this, 400);
     sfx.jingle();
-    text(this, WIDTH / 2, 196, 'RATING', { align: 'center', color: '787878' });
+    text(this, WIDTH / 2, 196, progress.practice ? 'RATING (PRACTICE RUN, NOT RANKED)' : 'RATING', { align: 'center', color: '787878' });
     const rank = text(this, WIDTH / 2, 207, '', { align: 'center', color: 'f8d878' });
     await typeOut(this, rank, rankFor(score.total), 45, sfx.tick);
 

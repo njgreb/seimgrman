@@ -35,15 +35,21 @@ export class Boot extends Phaser.Scene {
       generateBackground(this, `bg-${boss.id}`, boss.theme.bg, boss.theme.pattern);
     }
 
-    // Dev shortcuts: ?boss=<id> jumps into a fight, ?weapons=all grants every weapon,
-    // ?results / ?initials show the score and name entry screens with sample stats, ?scores the high score board.
+    // Dev shortcuts: ?boss=<id> jumps into a fight, ?weapons=all grants every weapon, ?results shows the score
+    // screen with sample stats (?results=lost for a loss to the final boss), ?scores the high score board.
+    // Any shortcut makes this a practice run that never reaches the leaderboard. ?initials (name entry with
+    // sample stats, which does submit) only exists in dev builds.
     const params = new URLSearchParams(window.location.search);
-    for (const [param, scene] of [['results', 'Results'], ['initials', 'NameEntry'], ['scores', 'Leaderboard']]) {
+    const screens: [string, string][] = [['results', 'Results'], ['scores', 'Leaderboard']];
+    if (import.meta.env.DEV) screens.push(['initials', 'NameEntry']);
+    for (const [param, scene] of screens) {
       if (!params.has(param)) continue;
-      progress.stats = { fightMs: 252_400, shots: 131, shotsLanded: 83, hitsTaken: 9 };
+      progress.practice = param !== 'initials';
+      progress.stats = { fightMs: 312_400, shots: 171, shotsLanded: 103, hitsTaken: 11, finalBossDefeated: params.get(param) !== 'lost' };
       this.scene.start(scene, { mode: 'after' });
       return;
     }
+    if (params.has('boss') || params.has('weapons')) progress.practice = true;
     if (params.get('weapons') === 'all') progress.weapons = ['buster', ...BOSSES.map((b) => b.reward)];
     // ?boss=cto&phase=2 starts the final fight at its second phase.
     const bossId = params.get('boss');

@@ -26,10 +26,11 @@ export const WEAKNESS_DAMAGE = 4;
 
 export const FLOOR_Y = 208; // top of the floor tiles in every arena
 
-// Scoring (see src/score.ts). Shown once, after the last boss. Max total is 100,000.
+// Scoring (see src/score.ts). Shown once, at the end of a run. Max total is 130,000.
 export const SCORE_CLEAR_BONUS = 10_000;
 export const SCORE_TIME_LIMIT_S = 600; // fight time past this earns no time bonus
 export const SCORE_PER_SECOND_SAVED = 50; // 30,000 max
 export const SCORE_PER_ACCURACY_PCT = 300; // 30,000 max
 export const SCORE_HIT_ALLOWANCE = 30; // each hit below this is worth SCORE_PER_HIT_AVOIDED
 export const SCORE_PER_HIT_AVOIDED = 1_000; // 30,000 max
+export const SCORE_FINAL_BOSS_BONUS = 30_000; // for beating the final boss (losing to him ends the run)

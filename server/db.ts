@@ -13,6 +13,7 @@ export interface Entry {
   fightMs: number;
   accuracy: number; // 0..1
   hitsTaken: number;
+  finalBossDefeated: boolean;
   createdAt: string;
 }
 
@@ -45,6 +46,7 @@ export async function migrate(query: Query): Promise<void> {
       ip_hash TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )`);
+  await query('ALTER TABLE scores ADD COLUMN IF NOT EXISTS final_boss_defeated BOOLEAN NOT NULL DEFAULT false');
   await query('CREATE INDEX IF NOT EXISTS scores_board ON scores (season, total DESC, created_at, id)');
 }
 
@@ -58,6 +60,7 @@ const toEntry = (row: Row, rank: number): Entry => {
     fightMs: Number(row.fight_ms),
     accuracy: shots ? Number(row.shots_landed) / shots : 0,
     hitsTaken: Number(row.hits_taken),
+    finalBossDefeated: row.final_boss_defeated === true,
     createdAt: new Date(row.created_at as string).toISOString(),
   };
 };
@@ -77,9 +80,9 @@ export async function insertScore(
 ): Promise<Entry> {
   const { season, initials, total, stats, build, ipHash } = score;
   const { rows } = await query(
-    `INSERT INTO scores (season, initials, total, fight_ms, shots, shots_landed, hits_taken, build, ip_hash)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-    [season, initials, total, Math.round(stats.fightMs), stats.shots, stats.shotsLanded, stats.hitsTaken, build, ipHash],
+    `INSERT INTO scores (season, initials, total, fight_ms, shots, shots_landed, hits_taken, final_boss_defeated, build, ip_hash)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+    [season, initials, total, Math.round(stats.fightMs), stats.shots, stats.shotsLanded, stats.hitsTaken, stats.finalBossDefeated, build, ipHash],
   );
   const row = rows[0];
   const ahead = await query(

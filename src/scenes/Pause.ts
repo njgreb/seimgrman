@@ -47,6 +47,13 @@ export class Pause extends Phaser.Scene {
       this.scene.stop();
     };
     const quit = () => {
+      if (arena.def.final) {
+        // no backing out of the final fight: quitting is losing
+        this.scene.resume('Arena');
+        this.scene.stop();
+        arena.giveUp();
+        return;
+      }
       this.scene.stop('Arena');
       this.scene.start('BossSelect');
     };

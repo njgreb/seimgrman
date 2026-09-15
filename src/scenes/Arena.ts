@@ -330,6 +330,7 @@ export class Arena extends Phaser.Scene {
     pod.setVisible(false);
     sfx.death();
     progress.defeated.add(this.def.id);
+    progress.stats.finalBossDefeated = true;
     await sleep(this, 1400);
 
     const pilot = this.physics.add.sprite(pod.x, pod.y, `boss-${this.def.id}`, FRAMES.hurt);
@@ -360,7 +361,39 @@ export class Arena extends Phaser.Scene {
     this.boss.body.setVelocityX(0);
     this.explode(this.player.x, this.player.y, 'fx-orb');
     sfx.death();
-    void this.gameOver();
+    // there are no retries against the final boss: losing ends the run
+    void (this.def.final ? this.reorged() : this.gameOver());
+  }
+
+  // Quitting from the pause menu during the final fight counts as losing it.
+  giveUp(): void {
+    if (this.over) return;
+    this.player.hp = 0;
+    this.player.dead = true;
+    this.player.body.enable = false;
+    this.player.setVisible(false);
+    this.onPlayerDied();
+  }
+
+  // Losing to the final boss: he gloats, you get the lose screen, then the run is scored like any other.
+  private async reorged(): Promise<void> {
+    await sleep(this, 1800);
+    if (this.boss.active && this.boss.visible) this.boss.say('YOUR ROLE HAS BEEN ELIMINATED.', 2200);
+    await sleep(this, 2200);
+    this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x200008, 0.9).setDepth(90);
+    sfx.death();
+    text(this, WIDTH / 2, 70, "YOU'VE BEEN", { align: 'center', scale: 2, depth: 91, color: 'f8f8f8' });
+    const big = text(this, WIDTH / 2, 92, 'REORGED', { align: 'center', scale: 3, depth: 91, color: 'f83800' });
+    this.tweens.add({ targets: big, scale: 3.3, duration: 180, yoyo: true, repeat: 2 });
+    await sleep(this, 900);
+    text(this, WIDTH / 2, 136, 'PLEASE RETURN YOUR BADGE', { align: 'center', depth: 91, color: 'bcbcbc' });
+    text(this, WIDTH / 2, 148, 'TO THE FRONT DESK.', { align: 'center', depth: 91, color: 'bcbcbc' });
+    await sleep(this, 1200);
+    const press = text(this, WIDTH / 2, 190, PROMPTS.start, { align: 'center', depth: 91, color: 'f8d878' });
+    this.time.addEvent({ delay: 450, loop: true, callback: () => press.setVisible(!press.visible) });
+    onMenu(this, (action) => {
+      if (action === 'start' || action === 'confirm') this.scene.start('Results');
+    });
   }
 
   private async gameOver(): Promise<void> {

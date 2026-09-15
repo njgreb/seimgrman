@@ -1,5 +1,6 @@
 import {
   SCORE_CLEAR_BONUS,
+  SCORE_FINAL_BOSS_BONUS,
   SCORE_HIT_ALLOWANCE,
   SCORE_PER_ACCURACY_PCT,
   SCORE_PER_HIT_AVOIDED,
@@ -14,6 +15,7 @@ export interface RunStats {
   shots: number; // trigger pulls that fired something
   shotsLanded: number; // trigger pulls where at least one projectile touched the boss
   hitsTaken: number;
+  finalBossDefeated: boolean; // the run ends at the final boss either way; beating him is worth a big bonus
 }
 
 export interface ScoreBreakdown extends RunStats {
@@ -22,10 +24,11 @@ export interface ScoreBreakdown extends RunStats {
   accuracyBonus: number;
   hitBonus: number;
   clearBonus: number;
+  finalBossBonus: number;
   total: number;
 }
 
-export const emptyStats = (): RunStats => ({ fightMs: 0, shots: 0, shotsLanded: 0, hitsTaken: 0 });
+export const emptyStats = (): RunStats => ({ fightMs: 0, shots: 0, shotsLanded: 0, hitsTaken: 0, finalBossDefeated: false });
 
 export function scoreRun(stats: RunStats): ScoreBreakdown {
   const accuracy = stats.shots ? stats.shotsLanded / stats.shots : 0;
@@ -33,10 +36,13 @@ export function scoreRun(stats: RunStats): ScoreBreakdown {
   const accuracyBonus = Math.round(accuracy * 100) * SCORE_PER_ACCURACY_PCT;
   const hitBonus = Math.max(0, SCORE_HIT_ALLOWANCE - stats.hitsTaken) * SCORE_PER_HIT_AVOIDED;
   const clearBonus = SCORE_CLEAR_BONUS;
-  return { ...stats, accuracy, timeBonus, accuracyBonus, hitBonus, clearBonus, total: timeBonus + accuracyBonus + hitBonus + clearBonus };
+  const finalBossBonus = stats.finalBossDefeated ? SCORE_FINAL_BOSS_BONUS : 0;
+  const total = timeBonus + accuracyBonus + hitBonus + clearBonus + finalBossBonus;
+  return { ...stats, accuracy, timeBonus, accuracyBonus, hitBonus, clearBonus, finalBossBonus, total };
 }
 
 const RANKS: [number, string][] = [
+  [115_000, 'THE NEW CTO'],
   [90_000, 'DISTINGUISHED ENGINEER'],
   [75_000, 'PRINCIPAL ENGINEER'],
   [60_000, 'STAFF ENGINEER'],

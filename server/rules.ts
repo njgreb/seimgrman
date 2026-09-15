@@ -22,13 +22,14 @@ export function validate(body: unknown): Submission | string {
   const { initials, stats, build } = body as Record<string, unknown>;
   if (typeof initials !== 'string' || !initialsAllowed(initials)) return 'initials not allowed';
   if (!stats || typeof stats !== 'object') return 'missing stats';
-  const { fightMs, shots, shotsLanded, hitsTaken } = stats as Record<string, unknown>;
+  const { fightMs, shots, shotsLanded, hitsTaken, finalBossDefeated = false } = stats as Record<string, unknown>;
   if (typeof fightMs !== 'number' || !Number.isFinite(fightMs) || fightMs < MIN_FIGHT_MS || fightMs > MAX_FIGHT_MS) return 'impossible run';
   if (!isCount(shots) || !isCount(shotsLanded) || !isCount(hitsTaken)) return 'impossible run';
   if (shotsLanded > shots || shotsLanded < MIN_SHOTS_LANDED) return 'impossible run';
+  if (typeof finalBossDefeated !== 'boolean') return 'bad request';
   return {
     initials,
-    stats: { fightMs, shots, shotsLanded, hitsTaken },
+    stats: { fightMs, shots, shotsLanded, hitsTaken, finalBossDefeated },
     build: typeof build === 'string' ? build.slice(0, 40) : null,
   };
 }

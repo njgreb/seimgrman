@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { WIDTH } from '../config';
 import { sfx } from '../audio/sfx';
+import { FINAL_BOSS } from '../data/bosses';
 import { PROMPTS, onMenu } from '../input';
 import { type Entry, fetchTop } from '../leaderboard';
 import { formatNumber, formatTime } from '../score';
@@ -49,6 +50,7 @@ export class Leaderboard extends Phaser.Scene {
     });
     if (mode === 'attract') this.time.delayedCall(ATTRACT_MS, leave);
 
+    text(this, WIDTH - 16, 214, `* BEAT ${FINAL_BOSS.name}`, { align: 'right', color: '787878' });
     const press = text(this, WIDTH / 2, 226, PROMPTS.start, { align: 'center', color: 'f8f8f8' });
     this.time.addEvent({ delay: 450, loop: true, callback: () => press.setVisible(!press.visible) });
 
@@ -79,7 +81,7 @@ export class Leaderboard extends Phaser.Scene {
     }
     const rowTexts = (entry: Entry, y: number, color: string) => [
       text(this, COLS.rank, y, ordinal(entry.rank), { align: 'right', color }),
-      text(this, COLS.name, y, entry.initials, { color }),
+      text(this, COLS.name, y, entry.finalBossDefeated ? `${entry.initials} *` : entry.initials, { color }),
       text(this, COLS.score, y, formatNumber(entry.total), { align: 'right', color }),
       text(this, COLS.time, y, formatTime(entry.fightMs), { align: 'right', color }),
     ];

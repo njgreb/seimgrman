@@ -16,6 +16,7 @@ export interface Entry {
   fightMs: number;
   accuracy: number;
   hitsTaken: number;
+  finalBossDefeated?: boolean;
 }
 
 export class LeaderboardError extends Error {

@@ -39,9 +39,10 @@ Add or remove bosses in `src/data/bosses.ts` (up to 8 fit the select screen). Ea
 
 **The final boss** (`src/bosses/cto.ts`, `FINAL_BOSS` in `src/data/bosses.ts`) waits at HQ until every boss above is
 beaten: an emergency all-hands invite, then a two-phase fight. Phase 1 is THE REORG MACHINE (only its cockpit
-takes damage, only while open; weak to TICKET SPLIT), phase 2 the escape pod (weak to CALENDAR BLOCK). Dying in
-phase 2 retries at phase 2. Its attacks remix the four managers' patterns, so if you swap a manager, the remix
-names in `cto.ts` are worth a look. Its portrait lives in `art/raw/cto/`.
+takes damage, only while open; weak to TICKET SPLIT), phase 2 the escape pod (weak to CALENDAR BLOCK). Losing
+(or quitting) ends the run with no retry; beating him is worth 30,000. Its attacks remix the four managers'
+patterns, so if you swap a manager, the remix names in `cto.ts` are worth a look. Its portrait lives in
+`art/raw/cto/`.
 
 AI portraits: see [art/README.md](art/README.md).
 
@@ -50,8 +51,9 @@ AI portraits: see [art/README.md](art/README.md).
 - `?boss=ticket` jumps straight into a fight (`?boss=cto&phase=2` starts the final fight at phase 2)
 - `?weapons=all` gives every weapon
 - `?debug` shows physics hitboxes
-- `?results` jumps to the end-of-game score screen with sample stats
-- `?initials` / `?scores` jump to name entry / the high score board (needs a leaderboard server, below)
+- `?results` jumps to the end-of-game score screen with sample stats (`?results=lost` for a loss)
+- `?scores` jumps to the high score board; `?initials` (dev builds only) to name entry. Both need a leaderboard
+  server (below). Runs started from any shortcut are practice runs and never reach the leaderboard.
 - In dev, `window.game` is the Phaser game (e.g. `game.scene.getScene('Arena').boss.hp = 1`)
 
 ## Tuning
@@ -61,15 +63,17 @@ crowd: `CONTACT_DAMAGE`, `PLAYER_INVULN_MS`, `ENERGY_REGEN_MS`, and each boss's 
 
 ## Scoring
 
-Shown once, on the PERFORMANCE REVIEW screen after the last boss. Stats add up across every fight in the run,
-including lost attempts, so retries cost you:
+Shown once, on the PERFORMANCE REVIEW screen at the end of a run. The run ends at the final boss either way:
+beat him for the big bonus, or lose (or quit) and get REORGED with no retry. Stats add up across every fight in
+the run, including lost attempts against managers, so retries cost you:
 
 | Part | Points (max) |
 | --- | --- |
 | Fight time (intros, menus and pause don't count) | 50 per second under 10:00 (30,000) |
 | Accuracy: trigger pulls that touched the boss (a 3-way spread counts once) | 300 per % (30,000) |
 | Hits taken | 1,000 per hit under 30 (30,000) |
-| Clear bonus | 10,000 |
+| Clear bonus (reaching the final boss) | 10,000 |
+| Beating the final boss | 30,000 |
 
 The weights live in `src/config.ts` (`SCORE_*`), the math in `src/score.ts`. The leaderboard server uses the
 same file, so it scores every run itself and never trusts a submitted total.
