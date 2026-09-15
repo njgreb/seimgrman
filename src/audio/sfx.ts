@@ -70,6 +70,8 @@ export const sfx = {
     muted = !muted;
     return muted;
   },
+  // Create/resume the audio context from inside a user gesture (required on mobile browsers).
+  unlock: () => void audio(),
   shoot: () => tone({ from: 880, to: 440, dur: 0.07, vol: 0.3 }),
   weapon: () => tone({ from: 300, to: 900, dur: 0.12, vol: 0.3 }),
   land: () => noise(0.05, 0.25, 0, 800),

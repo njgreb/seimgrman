@@ -3,7 +3,7 @@ import { GAME_TITLE, HEIGHT, WIDTH } from '../config';
 import { FRAMES } from '../art/characters';
 import { sfx } from '../audio/sfx';
 import { BOSSES } from '../data/bosses';
-import { onMenu } from '../input';
+import { PROMPTS, onMenu } from '../input';
 import { starfield, text } from '../ui/text';
 
 export class Ending extends Phaser.Scene {
@@ -55,7 +55,7 @@ export class Ending extends Phaser.Scene {
       duration: (endY + HEIGHT / 2) * 28,
       onComplete: () => {
         this.tweens.add({ targets: hero, alpha: 1, duration: 600 });
-        const press = text(this, WIDTH / 2, HEIGHT - 16, 'PRESS ENTER', { align: 'center', color: 'f8d878' });
+        const press = text(this, WIDTH / 2, HEIGHT - 16, PROMPTS.start, { align: 'center', color: 'f8d878' });
         this.time.addEvent({ delay: 450, loop: true, callback: () => press.setVisible(!press.visible) });
       },
     });

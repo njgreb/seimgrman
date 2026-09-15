@@ -9,6 +9,9 @@ npm run dev        # http://localhost:5173
 
 **Controls:** arrows move · Z / Space jump · X / C shoot · A / S switch weapon · Enter pause · M mute
 
+**On phones** an on-screen controller appears (D-pad, A jump, B shoot, L / R switch weapon, START pause,
+SELECT quit from pause). Add `?touch` to force it on in a desktop browser. "Add to Home Screen" runs it full screen.
+
 **Play it:** https://njgreb.github.io/seimgrman/ · every build: https://njgreb.github.io/seimgrman/builds/
 
 Every push to `main` deploys via `.github/workflows/deploy.yml`: the latest build goes to the site root and a

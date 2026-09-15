@@ -7,7 +7,7 @@ import type { BossDef, ShotSpec } from '../data/types';
 import { Boss } from '../entities/Boss';
 import { Player } from '../entities/Player';
 import { Shot } from '../entities/Shot';
-import { createControls, onMenu } from '../input';
+import { PROMPTS, createControls, onMenu } from '../input';
 import { progress } from '../state';
 import { Hud } from '../ui/Hud';
 import { sleep, text } from '../ui/text';
@@ -109,8 +109,8 @@ export class Arena extends Phaser.Scene {
       if (this.boss.alive) this.player.damage(CONTACT_DAMAGE, this.boss.x);
     });
 
-    this.input.keyboard!.on('keydown-ENTER', () => {
-      if (!this.fighting || this.over || this.time.now - this.resumedAt < 250) return;
+    onMenu(this, (action) => {
+      if (action !== 'start' || !this.fighting || this.over || this.time.now - this.resumedAt < 250) return;
       this.scene.launch('Pause');
       this.scene.pause();
     });
@@ -264,7 +264,7 @@ export class Arena extends Phaser.Scene {
     this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, 80, 0x000000, 0.85).setDepth(90);
     text(this, WIDTH / 2, 92, 'GAME OVER', { align: 'center', scale: 2, depth: 91, color: 'f83800' });
     text(this, WIDTH / 2, 116, "LET'S TAKE THIS OFFLINE.", { align: 'center', depth: 91 });
-    text(this, WIDTH / 2, 136, 'Z: RETRY    X: BOSS SELECT', { align: 'center', depth: 91, color: 'f8d878' });
+    text(this, WIDTH / 2, 136, PROMPTS.gameOver, { align: 'center', depth: 91, color: 'f8d878' });
     onMenu(this, (action) => {
       if (action === 'confirm' || action === 'start') this.scene.restart({ bossId: this.def.id });
       if (action === 'back') this.scene.start('BossSelect');

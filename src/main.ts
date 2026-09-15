@@ -9,9 +9,17 @@ import { Ending } from './scenes/Ending';
 import { Pause } from './scenes/Pause';
 import { Title } from './scenes/Title';
 import { WeaponGet } from './scenes/WeaponGet';
+import { TOUCH_ENABLED, mountTouchControls } from './touch';
 
-// Largest whole-number zoom that fits the window, so pixels stay square.
-const zoom = () => Math.max(1, Math.floor(Math.min(window.innerWidth / WIDTH, window.innerHeight / HEIGHT)));
+mountTouchControls(document.getElementById('app')!);
+
+// Desktop: largest whole-number zoom that fits, so pixels stay square.
+// Touch: fill the screen area. Phones are dense enough that uneven pixel widths don't show.
+const zoom = () => {
+  const screen = document.getElementById('screen')!;
+  const fit = Math.min(screen.clientWidth / WIDTH, screen.clientHeight / HEIGHT);
+  return TOUCH_ENABLED ? fit : Math.max(1, Math.floor(fit));
+};
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -29,7 +37,10 @@ const game = new Phaser.Game({
   scene: [Boot, Title, BossSelect, BossIntro, Arena, Pause, WeaponGet, Ending],
 });
 
-window.addEventListener('resize', () => game.scale.setZoom(zoom()));
+const rezoom = () => requestAnimationFrame(() => game.scale.setZoom(zoom()));
+window.addEventListener('resize', rezoom);
+window.addEventListener('orientationchange', rezoom);
+window.visualViewport?.addEventListener('resize', rezoom);
 window.addEventListener('keydown', (e) => {
   if (e.code === 'KeyM') sfx.toggleMute();
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();

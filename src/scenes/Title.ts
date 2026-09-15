@@ -3,7 +3,7 @@ import { GAME_TITLE, WIDTH } from '../config';
 import { FRAMES } from '../art/characters';
 import { sfx } from '../audio/sfx';
 import { BOSSES } from '../data/bosses';
-import { CONTROLS_HELP, onMenu } from '../input';
+import { CONTROLS_HELP, PROMPTS, onMenu } from '../input';
 import { progress } from '../state';
 import { starfield, text } from '../ui/text';
 
@@ -31,7 +31,7 @@ export class Title extends Phaser.Scene {
     const hero = this.add.sprite(WIDTH / 2, 94, 'player-buster', FRAMES.idle).setScale(2);
     this.time.addEvent({ delay: 900, loop: true, callback: () => hero.setFrame(hero.frame.name === String(FRAMES.shoot) ? FRAMES.idle : FRAMES.shoot) });
 
-    const press = text(this, WIDTH / 2, 134, 'PRESS ENTER', { align: 'center', color: 'f8d878' });
+    const press = text(this, WIDTH / 2, 134, PROMPTS.start, { align: 'center', color: 'f8d878' });
     this.time.addEvent({ delay: 450, loop: true, callback: () => press.setVisible(!press.visible) });
 
     CONTROLS_HELP.forEach((line, i) => text(this, WIDTH / 2, 164 + i * 11, line, { align: 'center', color: 'bcbcbc' }));

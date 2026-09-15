@@ -3,7 +3,7 @@ import { HEIGHT, MAX_ENERGY, WIDTH } from '../config';
 import { hexToInt } from '../art/palette';
 import { sfx } from '../audio/sfx';
 import { WEAPONS, WEAPON_ORDER } from '../data/weapons';
-import { onMenu } from '../input';
+import { PROMPTS, onMenu } from '../input';
 import { text } from '../ui/text';
 import type { Arena } from './Arena';
 
@@ -39,12 +39,16 @@ export class Pause extends Phaser.Scene {
       desc.setText(WEAPONS[owned[index]].description);
     };
     refresh();
-    text(this, WIDTH / 2, HEIGHT - 24, 'ENTER: RESUME   ESC: QUIT', { align: 'center', color: '787878' });
+    text(this, WIDTH / 2, HEIGHT - 24, PROMPTS.pause, { align: 'center', color: '787878' });
 
     const resume = () => {
       player.setWeapon(owned[index]);
       this.scene.resume('Arena');
       this.scene.stop();
+    };
+    const quit = () => {
+      this.scene.stop('Arena');
+      this.scene.start('BossSelect');
     };
 
     onMenu(this, (action) => {
@@ -54,11 +58,10 @@ export class Pause extends Phaser.Scene {
         refresh();
       } else if (action === 'start' || action === 'confirm') {
         resume();
+      } else if (action === 'select') {
+        quit();
       }
     });
-    this.input.keyboard!.on('keydown-ESC', () => {
-      this.scene.stop('Arena');
-      this.scene.start('BossSelect');
-    });
+    this.input.keyboard!.on('keydown-ESC', quit);
   }
 }

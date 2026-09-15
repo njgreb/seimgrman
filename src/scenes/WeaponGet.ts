@@ -4,7 +4,7 @@ import { FRAMES } from '../art/characters';
 import { sfx } from '../audio/sfx';
 import { BOSSES, bossById } from '../data/bosses';
 import { WEAPONS } from '../data/weapons';
-import { onMenu } from '../input';
+import { PROMPTS, onMenu } from '../input';
 import { progress } from '../state';
 import { sleep, starfield, text, typeOut } from '../ui/text';
 
@@ -41,7 +41,7 @@ export class WeaponGet extends Phaser.Scene {
 
     await sleep(this, 400);
     const allDone = BOSSES.every((b) => progress.defeated.has(b.id));
-    const press = text(this, WIDTH / 2, 214, 'PRESS ENTER', { align: 'center', color: 'f8d878' });
+    const press = text(this, WIDTH / 2, 214, PROMPTS.start, { align: 'center', color: 'f8d878' });
     this.time.addEvent({ delay: 450, loop: true, callback: () => press.setVisible(!press.visible) });
     onMenu(this, (action) => {
       if (action === 'start' || action === 'confirm') this.scene.start(allDone ? 'Ending' : 'BossSelect');

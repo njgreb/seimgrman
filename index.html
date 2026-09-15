@@ -2,17 +2,26 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     <title>MEGA MANAGER</title>
-    <link rel="icon" href="data:," />
+    <meta name="theme-color" content="#000000" />
+    <!-- "Add to Home Screen" launches full screen, without browser bars -->
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Mega Mgr" />
+    <link rel="apple-touch-icon" href="icon-180.png" />
+    <link rel="icon" href="icon-180.png" />
     <style>
-      html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
-      body { display: flex; align-items: center; justify-content: center; }
-      canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+      html, body { margin: 0; height: 100%; background: #000; overflow: hidden; overscroll-behavior: none; }
+      canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
     </style>
   </head>
   <body>
-    <div id="game"></div>
+    <div id="app">
+      <div id="screen"><div id="game"></div></div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

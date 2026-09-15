@@ -12,7 +12,7 @@ import {
 import { FRAMES } from '../art/characters';
 import { sfx } from '../audio/sfx';
 import { WEAPONS, WEAPON_ORDER } from '../data/weapons';
-import { type Controls, isDown } from '../input';
+import type { Controls } from '../input';
 import type { Arena } from '../scenes/Arena';
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
@@ -148,11 +148,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       return;
     }
 
-    const c = this.controls.held;
+    const c = this.controls;
     if (pressed.has('prev')) this.cycleWeapon(-1);
     if (pressed.has('next')) this.cycleWeapon(1);
 
-    const dir = (isDown(c.left) ? -1 : 0) + (isDown(c.right) ? 1 : 0);
+    const dir = (c.isDown('left') ? -1 : 0) + (c.isDown('right') ? 1 : 0);
     this.body.setVelocityX(dir * RUN_SPEED);
     if (dir !== 0) {
       this.facing = dir as 1 | -1;
@@ -164,7 +164,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.jumpHeld = true;
     }
     // Variable jump height: releasing jump cuts the ascent. A same-frame tap still gets a small hop.
-    if (!isDown(c.jump) && this.body.velocity.y < 0 && !this.jumpHeld) this.body.setVelocityY(0);
+    if (!c.isDown('jump') && this.body.velocity.y < 0 && !this.jumpHeld) this.body.setVelocityY(0);
     this.jumpHeld = false;
 
     if (pressed.has('shoot')) this.fire(time);
