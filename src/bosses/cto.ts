@@ -13,7 +13,7 @@ import { between, clamp, homing } from './util';
 
 const MACHINE_LANE = 150; // right edge of the floor the player can stand on during phase 1
 
-// Lands on the floor and bursts into two subtasks (TICKET MAN's backlog toss).
+// Lands on the floor and bursts into two subtasks (NATHAN MAN's backlog toss).
 const burstOnFloor = (b: Boss) => (shot: Shot) => {
   shot.angle += 12;
   if (shot.body.velocity.y <= 0 || shot.y < FLOOR_Y - 6) return;
@@ -46,7 +46,7 @@ async function mandatoryAllHands(b: Boss) {
   await b.wait(700);
 }
 
-// TICKET MAN remix: the cannon lobs tickets across the room; each bursts into subtasks.
+// NATHAN MAN remix: the cannon lobs tickets across the room; each bursts into subtasks.
 async function backlogDump(b: Boss) {
   b.say('BACKLOG DUMP');
   await b.telegraph(300);

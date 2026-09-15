@@ -11,6 +11,9 @@
     },
     "cto": {
       "portrait": "assets/bosses/cto/portrait.png"
+    },
+    "ticket": {
+      "portrait": "assets/bosses/ticket/portrait.png"
     }
   }
 }
