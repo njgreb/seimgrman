@@ -49,6 +49,7 @@ export class Arena extends Phaser.Scene {
   private playerReady = false;
   private fighting = false;
   private resumedAt = 0;
+  private landedVolleys = new Set<number>();
 
   constructor() {
     super('Arena');
@@ -59,6 +60,7 @@ export class Arena extends Phaser.Scene {
     this.over = false;
     this.playerReady = false;
     this.fighting = false;
+    this.landedVolleys.clear();
   }
 
   create(): void {
@@ -89,6 +91,12 @@ export class Arena extends Phaser.Scene {
     this.physics.add.overlap(this.playerShots, this.boss, (a, b) => {
       const shot = (a instanceof Shot ? a : b) as Shot;
       if (!shot.active || shot.mem.hit) return;
+      // Accuracy counts touching the boss, even during its invulnerability flicker.
+      const { volley } = shot.spec;
+      if (this.boss.alive && volley !== undefined && !this.landedVolleys.has(volley)) {
+        this.landedVolleys.add(volley);
+        progress.stats.shotsLanded++;
+      }
       if (this.boss.takeHit(shot)) {
         if (shot.spec.pierce) shot.mem.hit = true;
         else shot.destroy();
@@ -165,7 +173,8 @@ export class Arena extends Phaser.Scene {
     void this.boss.run();
   }
 
-  update(time: number): void {
+  update(time: number, delta: number): void {
+    if (this.fighting) progress.stats.fightMs += delta; // paused scenes don't update, so pause is free
     if (this.playerReady) this.player.update(time);
     this.hud.update();
   }

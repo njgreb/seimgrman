@@ -33,6 +33,7 @@ export interface ShotSpec {
   pierce?: boolean; // player shots: keep flying after hitting the boss
   lifespan?: number;
   weapon?: string; // player shots: which weapon fired it
+  volley?: number; // player shots: which trigger pull fired it (for accuracy)
   effect?: 'freeze';
   keepOffscreen?: boolean;
   update?: (shot: Shot, delta: number) => void;

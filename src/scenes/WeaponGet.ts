@@ -44,7 +44,7 @@ export class WeaponGet extends Phaser.Scene {
     const press = text(this, WIDTH / 2, 214, PROMPTS.start, { align: 'center', color: 'f8d878' });
     this.time.addEvent({ delay: 450, loop: true, callback: () => press.setVisible(!press.visible) });
     onMenu(this, (action) => {
-      if (action === 'start' || action === 'confirm') this.scene.start(allDone ? 'Ending' : 'BossSelect');
+      if (action === 'start' || action === 'confirm') this.scene.start(allDone ? 'Results' : 'BossSelect');
     });
   }
 }

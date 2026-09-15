@@ -34,8 +34,14 @@ export class Boot extends Phaser.Scene {
       generateBackground(this, `bg-${boss.id}`, boss.theme.bg, boss.theme.pattern);
     }
 
-    // Dev shortcuts: ?boss=<id> jumps into a fight, ?weapons=all grants every weapon.
+    // Dev shortcuts: ?boss=<id> jumps into a fight, ?weapons=all grants every weapon,
+    // ?results shows the score screen with sample stats.
     const params = new URLSearchParams(window.location.search);
+    if (params.has('results')) {
+      progress.stats = { fightMs: 252_400, shots: 131, shotsLanded: 83, hitsTaken: 9 };
+      this.scene.start('Results');
+      return;
+    }
     if (params.get('weapons') === 'all') progress.weapons = ['buster', ...BOSSES.map((b) => b.reward)];
     const bossId = params.get('boss');
     if (bossId && BOSSES.some((b) => b.id === bossId)) {

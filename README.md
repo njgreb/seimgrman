@@ -39,12 +39,28 @@ AI portraits: see [art/README.md](art/README.md).
 - `?boss=ticket` jumps straight into a fight
 - `?weapons=all` gives every weapon
 - `?debug` shows physics hitboxes
+- `?results` jumps to the end-of-game score screen with sample stats
 - In dev, `window.game` is the Phaser game (e.g. `game.scene.getScene('Arena').boss.hp = 1`)
 
 ## Tuning
 
 `src/config.ts` holds movement physics, damage and invulnerability timings. Useful knobs for an onsite
 crowd: `CONTACT_DAMAGE`, `PLAYER_INVULN_MS`, `ENERGY_REGEN_MS`, and each boss's `hp`.
+
+## Scoring
+
+Shown once, on the PERFORMANCE REVIEW screen after the last boss. Stats add up across every fight in the run,
+including lost attempts, so retries cost you:
+
+| Part | Points (max) |
+| --- | --- |
+| Fight time (intros, menus and pause don't count) | 50 per second under 10:00 (30,000) |
+| Accuracy: trigger pulls that touched the boss (a 3-way spread counts once) | 300 per % (30,000) |
+| Hits taken | 1,000 per hit under 30 (30,000) |
+| Clear bonus | 10,000 |
+
+The weights live in `src/config.ts` (`SCORE_*`), the math in `src/score.ts`. `scoreRun()` returns plain numbers,
+ready to send to a leaderboard.
 
 ## Shipping it
 

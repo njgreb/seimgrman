@@ -14,6 +14,7 @@ import { sfx } from '../audio/sfx';
 import { WEAPONS, WEAPON_ORDER } from '../data/weapons';
 import type { Controls } from '../input';
 import type { Arena } from '../scenes/Arena';
+import { progress as run } from '../state';
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
   declare body: Phaser.Physics.Arcade.Body;
@@ -71,6 +72,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const now = this.arena.time.now;
     if (this.dead || !this.controllable || now < this.invulnUntil) return false;
     this.hp = Math.max(0, this.hp - amount);
+    run.stats.hitsTaken++;
     if (this.hp <= 0) {
       this.dead = true;
       this.body.enable = false;
@@ -103,6 +105,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private fire(time: number): void {
     const w = WEAPONS[this.weapon];
     if ((this.energy[w.id] ?? 0) < w.cost) return;
+    const volley = run.stats.shots;
     const fired = w.fire({
       x: this.x + this.facing * 14,
       y: this.y + 2,
@@ -110,9 +113,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       onFloor: this.onFloor,
       playerX: () => this.x,
       count: (id) => this.arena.countPlayerShots(id),
-      spawn: (spec) => this.arena.spawnPlayerShot({ ...spec, weapon: w.id }),
+      spawn: (spec) => this.arena.spawnPlayerShot({ ...spec, weapon: w.id, volley }),
     });
     if (!fired) return;
+    run.stats.shots++;
     this.energy[w.id] -= w.cost;
     this.shootUntil = time + 250;
     if (w.id === 'buster') sfx.shoot();

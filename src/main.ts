@@ -7,6 +7,7 @@ import { BossIntro } from './scenes/BossIntro';
 import { BossSelect } from './scenes/BossSelect';
 import { Ending } from './scenes/Ending';
 import { Pause } from './scenes/Pause';
+import { Results } from './scenes/Results';
 import { Title } from './scenes/Title';
 import { WeaponGet } from './scenes/WeaponGet';
 import { TOUCH_ENABLED, mountTouchControls } from './touch';
@@ -34,7 +35,7 @@ const game = new Phaser.Game({
     default: 'arcade',
     arcade: { gravity: { x: 0, y: GRAVITY }, debug: new URLSearchParams(window.location.search).has('debug') },
   },
-  scene: [Boot, Title, BossSelect, BossIntro, Arena, Pause, WeaponGet, Ending],
+  scene: [Boot, Title, BossSelect, BossIntro, Arena, Pause, WeaponGet, Results, Ending],
 });
 
 const rezoom = () => requestAnimationFrame(() => game.scale.setZoom(zoom()));
