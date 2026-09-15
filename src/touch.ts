@@ -1,28 +1,14 @@
 import { sfx } from './audio/sfx';
+import { type Button, buttons } from './buttons';
 import './touch.css';
 
 // On-screen controller for phones: a DOM overlay around the canvas, so buttons stay big and sharp
-// and never cover the arena. It only reports buttons; src/input.ts maps them to game actions.
-
-export type Button = 'left' | 'right' | 'up' | 'down' | 'a' | 'b' | 'l' | 'r' | 'start' | 'select';
+// and never cover the arena. It only reports buttons (src/buttons.ts); src/input.ts maps them to game actions.
 
 const params = new URLSearchParams(window.location.search);
 // `?touch` forces the controller on (desktop testing), `?touch=0` forces it off.
 export const TOUCH_ENABLED =
   params.has('touch') ? params.get('touch') !== '0' : window.matchMedia('(pointer: coarse)').matches;
-
-type Listener = (button: Button) => void;
-
-const held = new Set<Button>();
-const listeners = new Set<Listener>();
-
-export const touch = {
-  isDown: (button: Button): boolean => held.has(button),
-  onPress(listener: Listener): () => void {
-    listeners.add(listener);
-    return () => listeners.delete(listener);
-  },
-};
 
 const DIRS: Button[][] = [['right'], ['down', 'right'], ['down'], ['down', 'left'], ['left'], ['up', 'left'], ['up'], ['up', 'right']];
 const DPAD_DEADZONE = 0.18; // fraction of the d-pad radius
@@ -93,13 +79,10 @@ export function mountTouchControls(app: HTMLElement): void {
   const refresh = () => {
     const next = new Set<Button>();
     for (const p of pointers.values()) for (const b of p.dpad ? dpadButtons(p.x, p.y) : buttonsAt(p.x, p.y)) next.add(b);
-    const pressed = [...next].filter((b) => !held.has(b));
-    held.clear();
-    for (const b of next) held.add(b);
-    for (const [dir, el] of dirEls) el.classList.toggle('on', held.has(dir));
-    for (const el of buttonEls) el.classList.toggle('on', held.has(el.dataset.btn as Button));
+    for (const [dir, el] of dirEls) el.classList.toggle('on', next.has(dir));
+    for (const el of buttonEls) el.classList.toggle('on', next.has(el.dataset.btn as Button));
+    const pressed = buttons.set('touch', next);
     if (pressed.length && 'vibrate' in navigator) navigator.vibrate(8);
-    for (const b of pressed) for (const l of [...listeners]) l(b);
   };
 
   const onDown = (e: PointerEvent) => {

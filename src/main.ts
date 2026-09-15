@@ -10,6 +10,7 @@ import { Pause } from './scenes/Pause';
 import { Results } from './scenes/Results';
 import { Title } from './scenes/Title';
 import { WeaponGet } from './scenes/WeaponGet';
+import { pollGamepads } from './gamepad';
 import { TOUCH_ENABLED, mountTouchControls } from './touch';
 
 mountTouchControls(document.getElementById('app')!);
@@ -37,6 +38,8 @@ const game = new Phaser.Game({
   },
   scene: [Boot, Title, BossSelect, BossIntro, Arena, Pause, WeaponGet, Results, Ending],
 });
+
+game.events.on(Phaser.Core.Events.PRE_STEP, pollGamepads);
 
 const rezoom = () => requestAnimationFrame(() => game.scale.setZoom(zoom()));
 window.addEventListener('resize', rezoom);

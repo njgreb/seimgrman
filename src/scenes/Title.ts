@@ -3,7 +3,7 @@ import { GAME_TITLE, WIDTH } from '../config';
 import { FRAMES } from '../art/characters';
 import { sfx } from '../audio/sfx';
 import { BOSSES } from '../data/bosses';
-import { CONTROLS_HELP, PROMPTS, onMenu } from '../input';
+import { PROMPTS, controlsHelp, onDeviceChange, onMenu } from '../input';
 import { progress } from '../state';
 import { starfield, text } from '../ui/text';
 
@@ -34,7 +34,14 @@ export class Title extends Phaser.Scene {
     const press = text(this, WIDTH / 2, 134, PROMPTS.start, { align: 'center', color: 'f8d878' });
     this.time.addEvent({ delay: 450, loop: true, callback: () => press.setVisible(!press.visible) });
 
-    CONTROLS_HELP.forEach((line, i) => text(this, WIDTH / 2, 164 + i * 11, line, { align: 'center', color: 'bcbcbc' }));
+    let help: Phaser.GameObjects.BitmapText[] = [];
+    const showHelp = () => {
+      help.forEach((t) => t.destroy());
+      help = controlsHelp().map((line, i) => text(this, WIDTH / 2, 164 + i * 11, line, { align: 'center', color: 'bcbcbc' }));
+      press.setText(PROMPTS.start);
+    };
+    showHelp();
+    onDeviceChange(this, showHelp);
 
     onMenu(this, (action) => {
       if (action === 'start' || action === 'confirm') {
