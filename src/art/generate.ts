@@ -157,7 +157,7 @@ export function generateProps(scene: Phaser.Scene): void {
 
 // CTO MAN's two phase bodies and the HQ skyline. The pilot is the final boss's own trait-drawn head.
 export const MACHINE_W = 80;
-export const MACHINE_H = 96;
+export const MACHINE_H = 80; // short enough that the cockpit sits at jump-shot height
 export const COCKPIT = { x: 22, y: 2, w: 36, h: 28 }; // dome, in machine texture pixels
 
 export function generateFinalBoss(scene: Phaser.Scene): void {
@@ -166,24 +166,24 @@ export function generateFinalBoss(scene: Phaser.Scene): void {
 
   const m = new PixelCanvas(MACHINE_W, MACHINE_H);
   // treads
-  m.round(3, 80, 74, 15, '383838').rect(5, 81, 70, 2, '505058');
-  for (const x of [7, 22, 37, 52, 63]) m.round(x, 84, 10, 10, '7c7c7c').rect(x + 4, 88, 2, 2, K);
+  m.round(3, 65, 74, 15, '383838').rect(5, 66, 70, 2, '505058');
+  for (const x of [7, 22, 37, 52, 63]) m.round(x, 69, 10, 10, '7c7c7c').rect(x + 4, 73, 2, 2, K);
   // hips and body
-  m.rect(16, 70, 48, 11, '4c4c58');
-  m.rect(8, 30, 64, 42, '7c7c7c').rect(8, 30, 64, 2, 'bcbcbc').rect(66, 32, 6, 40, '5c5c64');
+  m.rect(16, 56, 48, 10, '4c4c58');
+  m.rect(8, 30, 64, 28, '7c7c7c').rect(8, 30, 64, 2, 'bcbcbc').rect(66, 32, 6, 26, '5c5c64');
   // org chart screen, one box crossed out
-  m.rect(12, 37, 34, 24, K).rect(13, 38, 32, 22, '002040');
-  m.rect(26, 40, 6, 4, 'f83800').rect(28, 44, 2, 3, 'f8f8f8').rect(17, 47, 24, 1, 'f8f8f8');
-  for (const [x, c] of [[15, '3cbcfc'], [26, '58d854'], [37, 'f8b800']] as const) m.rect(x + 2, 48, 1, 2, 'f8f8f8').rect(x, 50, 6, 4, c);
-  m.pixels([[26, 50], [27, 51], [28, 52], [29, 53], [31, 50], [30, 51], [29, 52], [28, 53]], 'f83800');
-  m.rect(17, 56, 4, 2, '3cbcfc').rect(37, 56, 4, 2, 'f8b800');
+  m.rect(12, 33, 34, 18, K).rect(13, 34, 32, 16, '002040');
+  m.rect(26, 35, 6, 3, 'f83800').rect(28, 38, 2, 2, 'f8f8f8').rect(17, 40, 24, 1, 'f8f8f8');
+  for (const [x, c] of [[15, '3cbcfc'], [26, '58d854'], [37, 'f8b800']] as const) m.set(x + 2, 41, 'f8f8f8').rect(x, 42, 6, 4, c);
+  m.pixels([[26, 42], [27, 43], [28, 44], [29, 45], [31, 42], [30, 43], [29, 44], [28, 45]], 'f83800');
+  m.rect(17, 47, 4, 2, '3cbcfc').rect(37, 47, 4, 2, 'f8b800');
   // side panel lights
-  m.rect(52, 38, 10, 20, '5c5c64').rect(54, 40, 6, 2, 'f83800').rect(54, 45, 6, 2, 'f8b800').rect(54, 50, 6, 2, '58d854');
+  m.rect(52, 34, 10, 15, '5c5c64').rect(54, 36, 6, 2, 'f83800').rect(54, 40, 6, 2, 'f8b800').rect(54, 44, 6, 2, '58d854');
   // hazard stripe
-  m.rect(8, 64, 58, 6, 'f8b800');
-  for (let x = 8; x < 66; x += 6) m.rect(x, 64, 3, 6, K);
+  m.rect(8, 52, 58, 5, 'f8b800');
+  for (let x = 8; x < 66; x += 6) m.rect(x, 52, 3, 5, K);
   // cannon arm (left, toward the player)
-  m.round(6, 40, 12, 16, '4c4c58').rect(0, 45, 12, 8, '5c5c64').rect(0, 46, 3, 6, K);
+  m.round(6, 34, 12, 14, '4c4c58').rect(0, 38, 12, 8, '5c5c64').rect(0, 39, 3, 6, K);
   // neck, rim and cockpit dome with the pilot
   m.rect(33, 26, 14, 6, '505058');
   m.round(COCKPIT.x, COCKPIT.y, COCKPIT.w, COCKPIT.h, 'a4e4fc');

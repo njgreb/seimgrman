@@ -11,7 +11,9 @@ const TAUNTS = ['ANY QUESTIONS?', 'PER MY LAST EMAIL...', 'SYNERGY!', 'THIS IS F
 const SHUTTER_LIFT = COCKPIT.h - 2;
 
 // CTO MAN phase 1: a stationary mech parked on the right. Armor deflects everything; only the cockpit
-// takes damage, and only while its shutter is up between attacks.
+// takes damage, and only while its shutter is up between attacks. The cockpit sits at jump-shot height,
+// and shots flying at that height pass through the open air in front of it.
+const COCKPIT_PAD = 4; // px of forgiveness around the dome
 export class ReorgMachine extends Boss {
   private open = false;
   private lift = 0;
@@ -22,24 +24,29 @@ export class ReorgMachine extends Boss {
     super(arena, WIDTH - 16 - MACHINE_W / 2, -MACHINE_H, def);
     this.setTexture('cto-machine').setFlipX(false);
     this.facing = -1;
-    this.body.setSize(MACHINE_W - 12, MACHINE_H - 8).setOffset(8, 8);
+    this.body.setSize(MACHINE_W - 12, MACHINE_H - 2).setOffset(6, 2);
     this.body.setMaxVelocityY(600);
     this.shutter = arena.add.image(0, 0, 'cto-shutter');
     this.syncShutter();
   }
 
   get muzzle(): { x: number; y: number } {
-    return { x: this.x - MACHINE_W / 2, y: this.y + 1 };
+    return { x: this.x - MACHINE_W / 2, y: this.y + 2 };
   }
 
   private get cockpit(): Phaser.Geom.Rectangle {
     const left = this.x - MACHINE_W / 2 + COCKPIT.x;
     const top = this.y - MACHINE_H / 2 + COCKPIT.y;
-    return new Phaser.Geom.Rectangle(left - 4, top - 4, COCKPIT.w + 8, COCKPIT.h + 8);
+    return new Phaser.Geom.Rectangle(left - COCKPIT_PAD, top - COCKPIT_PAD, COCKPIT.w + COCKPIT_PAD * 2, COCKPIT.h + COCKPIT_PAD * 2);
   }
 
   private inCockpit(shot: Shot): boolean {
     return this.cockpit.contains(shot.x, shot.y);
+  }
+
+  // Above the body's top edge there's only the dome; everywhere else up there is empty air.
+  private aboveArmor(shot: Shot): boolean {
+    return shot.y < this.cockpit.bottom;
   }
 
   face(): void {
@@ -55,11 +62,13 @@ export class ReorgMachine extends Boss {
   }
 
   takeHit(shot: Shot): boolean {
-    if (!this.open || !this.inCockpit(shot)) {
+    if (this.inCockpit(shot)) {
+      if (this.open) return super.takeHit(shot);
       this.deflect(shot);
       return false;
     }
-    return super.takeHit(shot);
+    if (!this.aboveArmor(shot)) this.deflect(shot); // armor; otherwise it's still flying toward the dome
+    return false;
   }
 
   async enter(): Promise<void> {
