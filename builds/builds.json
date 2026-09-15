@@ -1,5 +1,10 @@
 [
   {
+    "sha": "e98d621",
+    "subject": "Fix CTO machine hitboxes: cockpit was unreachable",
+    "date": "2026-09-15T15:40:14-05:00"
+  },
+  {
     "sha": "818c53b",
     "subject": "CTO MAN final boss at HQ; TICKET MAN back to a placeholder",
     "date": "2026-09-15T14:01:50-05:00"
