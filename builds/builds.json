@@ -1,5 +1,10 @@
 [
   {
+    "sha": "bd0d942",
+    "subject": "Gamepad support",
+    "date": "2026-09-15T00:39:45-05:00"
+  },
+  {
     "sha": "ea2441a",
     "subject": "Add ETS R&D credit and SEI tokens line to the ending",
     "date": "2026-09-15T00:32:25-05:00"
