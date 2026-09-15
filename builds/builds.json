@@ -1,5 +1,10 @@
 [
   {
+    "sha": "39d971e",
+    "subject": "Nathan takes the ticket slot; new Brent portrait",
+    "date": "2026-09-15T15:53:23-05:00"
+  },
+  {
     "sha": "e98d621",
     "subject": "Fix CTO machine hitboxes: cockpit was unreachable",
     "date": "2026-09-15T15:40:14-05:00"
