@@ -3,26 +3,30 @@ import { type IncomingMessage, type ServerResponse, createServer } from 'node:ht
 import { scoreRun } from '../src/score.ts';
 import { connect, deleteScore, insertScore, migrate, topScores } from './db.ts';
 import { rateLimited, validate } from './rules.ts';
+import { staticFiles } from './static.ts';
 
-// MEGA MANAGER leaderboard API.
+// MEGA MANAGER server: the built game plus the leaderboard API, so one Railway service hosts both.
 //
 //   GET    /health
 //   GET    /scores?limit=10          top scores for the current season
 //   POST   /scores                   { initials, stats, build } -> { entry, scores }
 //   DELETE /scores/:id               admin only: Authorization: Bearer $ADMIN_TOKEN
 //
-// Env: PORT, DATABASE_URL, SEASON (bump to start a fresh board), ADMIN_TOKEN, ALLOWED_ORIGINS (comma-separated),
-// RATE_LIMIT_PER_MIN (submissions per IP, default 10).
+// Env: PORT, DATABASE_URL, SEASON (bump to start a fresh board), ADMIN_TOKEN, ALLOWED_ORIGINS (comma-separated,
+// for the GitHub Pages copy; same-origin play needs none), RATE_LIMIT_PER_MIN (submissions per IP, default 10),
+// STATIC_DIR (built game, default ../dist; set empty to run the API alone).
 
 const PORT = Number(process.env.PORT ?? 8787);
 const SEASON = process.env.SEASON ?? '1';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN ?? '';
 const ALLOWED_ORIGINS = new Set(
-  (process.env.ALLOWED_ORIGINS ?? 'https://njgreb.github.io,http://localhost:5173')
+  (process.env.ALLOWED_ORIGINS ?? 'https://njgreb.github.io,http://localhost:5173,http://localhost:8787')
     .split(',')
     .map((o) => o.trim())
     .filter(Boolean),
 );
+const STATIC_DIR = process.env.STATIC_DIR ?? '../dist';
+const serveStatic = STATIC_DIR ? staticFiles(STATIC_DIR) : null;
 const MAX_BODY_BYTES = 2048;
 const BOARD_SIZE = 10;
 
@@ -112,6 +116,7 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
     return send(req, res, deleted ? 200 : 404, { deleted });
   }
 
+  if (serveStatic && (await serveStatic(req, res, url.pathname))) return;
   send(req, res, 404, { error: 'not found' });
 }
 

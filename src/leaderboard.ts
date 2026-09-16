@@ -2,8 +2,10 @@ import type { RunStats } from './score';
 
 // Client for the leaderboard server (server/). The whole feature switches on when the build sets
 // VITE_LEADERBOARD_URL; without it the game skips name entry and the title screen's high score loop.
+// 'self' means the server that served the page (the Railway build serves game and API together).
 
-const BASE = (import.meta.env.VITE_LEADERBOARD_URL as string | undefined)?.replace(/\/$/, '');
+const configured = import.meta.env.VITE_LEADERBOARD_URL as string | undefined;
+const BASE = configured === 'self' ? window.location.origin : configured?.replace(/\/$/, '');
 const TIMEOUT_MS = 6000;
 
 export const LEADERBOARD_ENABLED = !!BASE;

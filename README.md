@@ -88,6 +88,10 @@ After the review screen, players enter 3 initials and see the top 10. The title 
 10 idle seconds. The game talks to `server/` (Node + Postgres on Railway) and only turns the leaderboard on when
 the build sets `VITE_LEADERBOARD_URL`.
 
+The Railway service hosts **both**: `server/Dockerfile` builds the game and serves `dist/` next to the API, so
+`https://<domain>/` is the game and `https://<domain>/scores` is the leaderboard (same origin, no CORS needed).
+The GitHub Pages copy still works and talks to the same API cross-origin.
+
 **Railway setup (once):**
 
 1. New project → add **PostgreSQL**.
