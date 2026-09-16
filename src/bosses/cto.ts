@@ -74,8 +74,8 @@ async function fiveYearRoadmap(b: Boss) {
 }
 
 // BRENT MAN remix: the floor catches fire where you stand, then a shockwave rolls out of the machine.
-async function sevZero(b: Boss) {
-  b.say('SEV 0!');
+async function execEscalation(b: Boss) {
+  b.say('EXEC ESCALATION!');
   await b.telegraph(300);
   const xs = [clamp(b.player.x, 24, MACHINE_LANE), between(24, MACHINE_LANE)];
   if (b.enraged) xs.push(between(24, MACHINE_LANE));
@@ -194,10 +194,10 @@ export const ctoMan: BossDef = {
   theme: { bg: '200008', pattern: '480018', tile: '383838', tileLight: '7c7c7c' },
   weakness: 'ticket',
   reward: 'buster',
-  patterns: [mandatoryAllHands, backlogDump, fiveYearRoadmap, sevZero],
+  patterns: [mandatoryAllHands, backlogDump, fiveYearRoadmap, execEscalation],
   final: true,
   phases: [
-    { body: 'machine', weakness: 'ticket', patterns: [mandatoryAllHands, backlogDump, fiveYearRoadmap, sevZero] },
+    { body: 'machine', weakness: 'ticket', patterns: [mandatoryAllHands, backlogDump, fiveYearRoadmap, execEscalation] },
     { body: 'capsule', weakness: 'calendar', patterns: [skipLevel, allHands, doubleBooked] },
   ],
 };

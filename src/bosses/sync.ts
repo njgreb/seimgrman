@@ -3,7 +3,7 @@ import type { BossDef } from '../data/types';
 import type { Boss } from '../entities/Boss';
 import { between, homing } from './util';
 
-// Meetings. Weak to PAGER WAVE (nothing ends a meeting faster than a page).
+// Meetings. Weak to ESCALATION WAVE (nothing ends a meeting faster than an exec escalation).
 
 async function inviteSpread(b: Boss) {
   b.face();

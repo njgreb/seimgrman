@@ -64,7 +64,8 @@ export class Ending extends Phaser.Scene {
     line('AND THANKS TO OUR MANAGERS,', 'f8f8f8');
     line('WHO ARE ACTUALLY PRETTY GREAT.', 'f8f8f8');
     y += 30;
-    line('A CREATION OF ETS R&D', 'a4e4fc');
+    line('A CREATION OF <REDACTED>', 'a4e4fc');
+    line('(THE CONSOLE KNOWS MORE)', '787878');
     y += 10;
     // 44 characters is wider than the 256px screen, so this one is split
     line('NO SEI TOKENS WERE SPENT', '787878');

@@ -99,9 +99,9 @@ const list: WeaponDef[] = [
   },
   {
     id: 'pager',
-    name: 'PAGER WAVE',
+    name: 'ESCALATION WAVE',
     short: 'W',
-    description: 'A WAKE-UP CALL ALONG THE FLOOR.',
+    description: 'GOES STRAIGHT TO THE TOP.',
     colors: ['a81000', 'f8b800'],
     cost: 3,
     damage: 3,

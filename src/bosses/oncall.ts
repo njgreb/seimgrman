@@ -4,11 +4,14 @@ import type { Boss } from '../entities/Boss';
 import { sfx } from '../audio/sfx';
 import { between } from './util';
 
-// Incidents. Weak to PIVOT BOOMERANG (just... pivot away from the outage).
+// The customer is always on the line. Weak to PIVOT BOOMERANG (nothing derails an ask like a pivot).
 
-async function pageBurst(b: Boss) {
+// Thrown in after an attack, so he always has one more thing.
+const ASIDES = ['CAN WE GET THIS BY FRIDAY?', 'IS THIS A P0?', 'I ALREADY PROMISED IT.', 'THE CUSTOMER LOVED THE DEMO.', 'JUST ONE MORE THING:'];
+
+async function quickAsk(b: Boss) {
   b.face();
-  b.say('PAGED!', 600);
+  b.say('QUICK ASK!', 600);
   await b.telegraph(250);
   for (let i = 0; i < (b.enraged ? 5 : 3); i++) {
     b.face();
@@ -16,11 +19,12 @@ async function pageBurst(b: Boss) {
     sfx.beep();
     await b.wait(150);
   }
-  await b.wait(300);
+  b.say(ASIDES[between(0, ASIDES.length - 1)], 900);
+  await b.wait(500);
 }
 
-async function incident(b: Boss) {
-  b.say('SEV 1!', 600);
+async function escalation(b: Boss) {
+  b.say('ESCALATION!', 600);
   await b.telegraph(200);
   await b.jumpTo(b.player.x, 96);
   b.arena.shake();
@@ -31,9 +35,9 @@ async function incident(b: Boss) {
   await b.wait(500);
 }
 
-async function outage(b: Boss) {
+async function launchDay(b: Boss) {
   b.face();
-  b.say('OUTAGE!');
+  b.say('LAUNCH DAY!');
   await b.telegraph(300);
   const xs = [b.player.x, between(TILE * 2, WIDTH - TILE * 2), between(TILE * 2, WIDTH - TILE * 2)];
   if (b.enraged) xs.push(between(TILE * 2, WIDTH - TILE * 2));
@@ -53,9 +57,9 @@ export const oncallMan: BossDef = {
   id: 'oncall',
   name: 'BRENT MAN',
   manager: 'BRENT',
-  intro: 'DID ANYONE ELSE GET PAGED?',
-  defeatQuote: 'MARKING INCIDENT RESOLVED.',
-  credit: 'SLEEPS WITH THE PAGER ON',
+  intro: 'THE CUSTOMER IS ON THE LINE.',
+  defeatQuote: "I'LL TAKE THIS AS FEEDBACK.",
+  credit: 'HAS ONE QUICK ASK',
   look: {
     skin: 'e0ac69',
     hair: '909090',
@@ -69,5 +73,5 @@ export const oncallMan: BossDef = {
   theme: { bg: '200020', pattern: '401040', tile: '6844fc', tileLight: 'b8b8f8' },
   weakness: 'pivot',
   reward: 'pager',
-  patterns: [pageBurst, incident, outage],
+  patterns: [quickAsk, escalation, launchDay],
 };
