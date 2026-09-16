@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { between } from '../bosses/util';
 import { TILE, WIDTH } from '../config';
 import { sfx } from '../audio/sfx';
 import type { BossDef } from '../data/types';
@@ -6,6 +7,11 @@ import type { Arena } from '../scenes/Arena';
 import { Boss } from './Boss';
 
 // CTO MAN phase 2: the pilot's escape pod. Flies, teleports, ignores gravity.
+//
+// A jump shot only reaches about y 143, so between attacks the pod drops into that band and hovers:
+// the flying equivalent of the machine opening its cockpit.
+const HOVER_Y = 150;
+const HOVER_TAUNTS = ["I'LL SEND A RECAP.", 'CIRCLING BACK.', 'ADDING A FOLLOW-UP.', 'NOTED. NEXT SLIDE.', 'PARKING LOT!'];
 export class Capsule extends Boss {
   constructor(arena: Arena, def: BossDef, x: number, y: number) {
     super(arena, x, y, def);
@@ -23,7 +29,7 @@ export class Capsule extends Boss {
   }
 
   async enter(): Promise<void> {
-    await this.flyTo(WIDTH - 64, 84, 160);
+    await this.flyTo(WIDTH - 64, 110, 160);
     this.face();
     await this.wait(300);
   }
@@ -57,6 +63,15 @@ export class Capsule extends Boss {
       await this.wait(50);
     }
     this.setVisible(true);
+  }
+
+  // Between attacks it drops to one side of the player, in range, and gloats.
+  protected async afterPattern(): Promise<void> {
+    const side = this.player.x < WIDTH / 2 ? 1 : -1;
+    await this.flyTo(this.player.x + side * between(56, 88), HOVER_Y, 200);
+    this.face();
+    this.say(HOVER_TAUNTS[between(0, HOVER_TAUNTS.length - 1)], 900);
+    await this.wait(this.enraged ? 900 : 1300);
   }
 
   protected animate(): void {

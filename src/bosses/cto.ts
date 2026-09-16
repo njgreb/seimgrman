@@ -102,7 +102,7 @@ const RING = ['e-invite', 'e-ticket-small', 'e-milestone', 'e-page'];
 // Teleports in and fires every manager's projectile in a ring.
 async function skipLevel(b: Boss) {
   const pod = b as Capsule;
-  await pod.teleportTo(between(40, WIDTH - 40), between(48, 100));
+  await pod.teleportTo(between(40, WIDTH - 40), between(96, 144));
   b.say('SKIP-LEVEL!', 600);
   await b.telegraph(350);
   for (let ring = 0; ring < (b.enraged ? 2 : 1); ring++) {
@@ -117,7 +117,7 @@ async function skipLevel(b: Boss) {
 // Calls the four managers back as holograms, and each one takes a shot at you.
 async function allHands(b: Boss) {
   const pod = b as Capsule;
-  await pod.flyTo(WIDTH / 2, 40, 170);
+  await pod.flyTo(WIDTH / 2, 92, 170);
   b.say('ALL-HANDS!', 900);
   await b.telegraph(400);
 
@@ -163,7 +163,7 @@ async function allHands(b: Boss) {
 // Dives at you, sends shockwaves both ways on impact, then floats back up.
 async function doubleBooked(b: Boss) {
   const pod = b as Capsule;
-  await pod.flyTo(b.player.x, 52, 190);
+  await pod.flyTo(b.player.x, 76, 190);
   b.say('DOUBLE-BOOKED!', 700);
   await b.telegraph(b.enraged ? 250 : 420);
   await pod.flyTo(b.player.x, FLOOR_Y - 20, b.enraged ? 300 : 240);
@@ -171,7 +171,7 @@ async function doubleBooked(b: Boss) {
   b.arena.shake();
   for (const dir of [-1, 1]) b.fire({ texture: 'e-shockwave', x: b.x + dir * 12, y: FLOOR_Y - 8, vx: dir * 150, damage: 3, pierce: true }, false);
   await b.wait(400);
-  await pod.flyTo(between(40, WIDTH - 40), between(56, 96), 160);
+  await pod.flyTo(between(40, WIDTH - 40), between(110, 150), 160);
 }
 
 export const ctoMan: BossDef = {
