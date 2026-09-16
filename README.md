@@ -38,7 +38,7 @@ Add or remove bosses in `src/data/bosses.ts` (up to 8 fit the select screen). Ea
 `reward` weapon in `src/data/weapons.ts`.
 
 **The final boss** (`src/bosses/cto.ts`, `FINAL_BOSS` in `src/data/bosses.ts`) waits at HQ until every boss above is
-beaten: an emergency all-hands invite, then a two-phase fight. Phase 1 is THE REORG MACHINE (only its cockpit
+beaten: an emergency all-hands invite, then a two-phase fight. Phase 1 is THE ALL-HANDS MACHINE (only its cockpit
 takes damage, only while open; weak to TICKET SPLIT), phase 2 the escape pod (weak to CALENDAR BLOCK). Losing
 (or quitting) ends the run with no retry; beating him is worth 30,000. Its attacks remix the four managers'
 patterns, so if you swap a manager, the remix names in `cto.ts` are worth a look. Its portrait lives in

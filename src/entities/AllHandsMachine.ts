@@ -7,14 +7,14 @@ import type { Arena } from '../scenes/Arena';
 import { Boss } from './Boss';
 import type { Shot } from './Shot';
 
-const TAUNTS = ['ANY QUESTIONS?', 'PER MY LAST EMAIL...', 'SYNERGY!', 'THIS IS FINE.', "LET'S TAKE A BEAT."];
+const TAUNTS = ['ANY QUESTIONS?', 'PER MY LAST EMAIL...', 'SYNERGY!', "LET'S TAKE A BEAT.", 'QUICK FOLLOW-UP:', "I'LL KEEP THIS BRIEF."];
 const SHUTTER_LIFT = COCKPIT.h - 2;
 
-// CTO MAN phase 1: a stationary mech parked on the right. Armor deflects everything; only the cockpit
-// takes damage, and only while its shutter is up between attacks. The cockpit sits at jump-shot height,
-// and shots flying at that height pass through the open air in front of it.
+// CTO MAN phase 1: THE ALL-HANDS MACHINE, a stationary mech parked on the right. Armor deflects everything;
+// only the cockpit takes damage, and only while its shutter is up between attacks. The cockpit sits at
+// jump-shot height, and shots flying at that height pass through the open air in front of it.
 const COCKPIT_PAD = 4; // px of forgiveness around the dome
-export class ReorgMachine extends Boss {
+export class AllHandsMachine extends Boss {
   private open = false;
   private lift = 0;
   private taunt = 0;
@@ -77,7 +77,7 @@ export class ReorgMachine extends Boss {
     this.arena.shake();
     await this.wait(400);
     await this.setOpen(true);
-    this.say('WELCOME TO THE NEW ORG CHART.', 1400);
+    this.say("I'VE GOT 15 MINUTES. LET'S USE THEM.", 1400);
     await this.wait(1400);
     await this.setOpen(false);
   }

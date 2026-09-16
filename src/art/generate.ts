@@ -171,12 +171,13 @@ export function generateFinalBoss(scene: Phaser.Scene): void {
   // hips and body
   m.rect(16, 56, 48, 10, '4c4c58');
   m.rect(8, 30, 64, 28, '7c7c7c').rect(8, 30, 64, 2, 'bcbcbc').rect(66, 32, 6, 26, '5c5c64');
-  // org chart screen, one box crossed out
+  // calendar screen: a week with no free slots left
   m.rect(12, 33, 34, 18, K).rect(13, 34, 32, 16, '002040');
-  m.rect(26, 35, 6, 3, 'f83800').rect(28, 38, 2, 2, 'f8f8f8').rect(17, 40, 24, 1, 'f8f8f8');
-  for (const [x, c] of [[15, '3cbcfc'], [26, '58d854'], [37, 'f8b800']] as const) m.set(x + 2, 41, 'f8f8f8').rect(x, 42, 6, 4, c);
-  m.pixels([[26, 42], [27, 43], [28, 44], [29, 45], [31, 42], [30, 43], [29, 44], [28, 45]], 'f83800');
-  m.rect(17, 47, 4, 2, '3cbcfc').rect(37, 47, 4, 2, 'f8b800');
+  m.rect(13, 34, 32, 2, '505058');
+  for (let x = 16; x < 45; x += 6) m.rect(x, 34, 1, 2, 'f8f8f8');
+  m.rect(14, 37, 5, 5, 'f83800').rect(20, 37, 5, 8, '3cbcfc').rect(26, 38, 5, 4, '58d854').rect(32, 37, 5, 6, 'f8b800');
+  m.rect(38, 39, 6, 5, 'f85898').rect(14, 43, 5, 6, 'd800cc').rect(26, 43, 10, 3, 'e45c10');
+  m.rect(20, 46, 5, 3, 'f8b800').rect(37, 45, 7, 4, '3cbcfc').rect(28, 47, 8, 2, '58d854');
   // side panel lights
   m.rect(52, 34, 10, 15, '5c5c64').rect(54, 36, 6, 2, 'f83800').rect(54, 40, 6, 2, 'f8b800').rect(54, 44, 6, 2, '58d854');
   // hazard stripe

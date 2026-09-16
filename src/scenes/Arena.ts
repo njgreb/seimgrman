@@ -375,19 +375,19 @@ export class Arena extends Phaser.Scene {
     this.onPlayerDied();
   }
 
-  // Losing to the final boss: he gloats, you get the lose screen, then the run is scored like any other.
+  // Losing to the final boss: he books your whole week, then the run is scored like any other.
   private async reorged(): Promise<void> {
     await sleep(this, 1800);
-    if (this.boss.active && this.boss.visible) this.boss.say('YOUR ROLE HAS BEEN ELIMINATED.', 2200);
+    if (this.boss.active && this.boss.visible) this.boss.say("I'M PUTTING TIME ON YOUR CALENDAR.", 2200);
     await sleep(this, 2200);
     this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x200008, 0.9).setDepth(90);
     sfx.death();
-    text(this, WIDTH / 2, 70, "YOU'VE BEEN", { align: 'center', scale: 2, depth: 91, color: 'f8f8f8' });
-    const big = text(this, WIDTH / 2, 92, 'REORGED', { align: 'center', scale: 3, depth: 91, color: 'f83800' });
+    text(this, WIDTH / 2, 70, 'YOUR CALENDAR', { align: 'center', scale: 2, depth: 91, color: 'f8f8f8' });
+    const big = text(this, WIDTH / 2, 92, 'IS FULL', { align: 'center', scale: 3, depth: 91, color: 'f83800' });
     this.tweens.add({ targets: big, scale: 3.3, duration: 180, yoyo: true, repeat: 2 });
     await sleep(this, 900);
-    text(this, WIDTH / 2, 136, 'PLEASE RETURN YOUR BADGE', { align: 'center', depth: 91, color: 'bcbcbc' });
-    text(this, WIDTH / 2, 148, 'TO THE FRONT DESK.', { align: 'center', depth: 91, color: 'bcbcbc' });
+    text(this, WIDTH / 2, 136, 'YOUR NEXT FREE SLOT', { align: 'center', depth: 91, color: 'bcbcbc' });
+    text(this, WIDTH / 2, 148, 'IS IN Q3.', { align: 'center', depth: 91, color: 'bcbcbc' });
     await sleep(this, 1200);
     const press = text(this, WIDTH / 2, 190, PROMPTS.start, { align: 'center', depth: 91, color: 'f8d878' });
     this.time.addEvent({ delay: 450, loop: true, callback: () => press.setVisible(!press.visible) });

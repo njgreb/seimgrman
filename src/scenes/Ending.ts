@@ -38,7 +38,7 @@ export class Ending extends Phaser.Scene {
     line('ALL MANAGERS', 'f8d878', 2);
     line('DEFEATED!', 'f8d878', 2);
     y += 16;
-    line(progress.stats.finalBossDefeated ? 'YOUR CALENDAR IS FINALLY FREE.' : 'THE REORG WENT AHEAD ANYWAY.', 'a4e4fc');
+    line(progress.stats.finalBossDefeated ? 'YOUR CALENDAR IS FINALLY FREE.' : 'YOUR CALENDAR NEVER RECOVERED.', 'a4e4fc');
     y += 30;
 
     for (const boss of BOSSES) {

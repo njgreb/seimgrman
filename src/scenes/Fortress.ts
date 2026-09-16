@@ -62,9 +62,9 @@ export class Fortress extends Phaser.Scene {
     sfx.teleport();
     await sleep(this, 400);
     const line1 = add(text(this, 122, 142, '', { color: 'f8f8f8' }));
-    await typeOut(this, line1, `"WE'RE MAKING`, 45, sfx.tick);
+    await typeOut(this, line1, `"I'VE ADDED A FEW`, 45, sfx.tick);
     const line2 = add(text(this, 122, 154, '', { color: 'f8f8f8' }));
-    await typeOut(this, line2, `SOME CHANGES."`, 45, sfx.tick);
+    await typeOut(this, line2, `THINGS TO YOUR CALENDAR."`, 45, sfx.tick);
     await sleep(this, 1400);
 
     // HQ, under alarms
@@ -76,7 +76,7 @@ export class Fortress extends Phaser.Scene {
     const hq = this.add.image(WIDTH / 2, 120, 'fx-hq').setScale(1.5).setAlpha(0);
     this.tweens.add({ targets: hq, alpha: 1, y: 112, duration: 600 });
     text(this, WIDTH / 2, 14, 'HQ', { align: 'center', scale: 2, color: 'f8f8f8' });
-    const warning = text(this, WIDTH / 2, 196, 'WARNING: REORG IN PROGRESS', { align: 'center', color: 'f8d878' });
+    const warning = text(this, WIDTH / 2, 196, 'WARNING: INVITE INCOMING', { align: 'center', color: 'f8d878' });
     this.time.addEvent({ delay: 260, loop: true, callback: () => warning.setVisible(!warning.visible) });
     text(this, WIDTH / 2, 222, PROMPTS.start, { align: 'center', color: 'bcbcbc' });
     for (let i = 0; i < 6; i++) {

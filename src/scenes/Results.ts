@@ -36,7 +36,7 @@ export class Results extends Phaser.Scene {
     const title = text(this, WIDTH / 2, 14, '', { align: 'center', scale: 2, color: 'f8d878' });
     await typeOut(this, title, 'PERFORMANCE REVIEW', 40, sfx.tick);
     const won = score.finalBossDefeated;
-    text(this, WIDTH / 2, 34, won ? `${FINAL_BOSS.name} DEFEATED` : "YOU'VE BEEN REORGED", { align: 'center', color: won ? 'a4e4fc' : 'f87858' });
+    text(this, WIDTH / 2, 34, won ? `${FINAL_BOSS.name} DEFEATED` : 'YOUR CALENDAR IS FULL', { align: 'center', color: won ? 'a4e4fc' : 'f87858' });
     this.add.sprite(WIDTH / 2, 66, 'player-buster', won ? FRAMES.shoot : FRAMES.hurt).setScale(1.5);
     await sleep(this, 400);
 

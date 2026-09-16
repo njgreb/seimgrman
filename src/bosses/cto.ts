@@ -7,7 +7,7 @@ import type { Capsule } from '../entities/Capsule';
 import type { Shot } from '../entities/Shot';
 import { between, clamp, homing } from './util';
 
-// The final boss at HQ. Phase 1 pilots THE REORG MACHINE (weak to TICKET SPLIT: break the reorg down),
+// The final boss at HQ. Phase 1 pilots THE ALL-HANDS MACHINE (weak to TICKET SPLIT: break the agenda down),
 // phase 2 flees in an escape pod (weak to CALENDAR BLOCK: block off his calendar).
 // Every attack is an "ALL-HANDS" remix of a manager you already beat.
 
@@ -28,7 +28,7 @@ function lob(from: { x: number; y: number }, targetX: number, vy = -300): { vx: 
   return { vx: (clamp(targetX, TILE + 8, WIDTH - TILE - 8) - from.x) / t, vy };
 }
 
-// ---- phase 1: THE REORG MACHINE ----
+// ---- phase 1: THE ALL-HANDS MACHINE ----
 
 // PARKER MAN remix: a wall of invites with a gap to slip through, then a homing meeting clock.
 async function mandatoryAllHands(b: Boss) {
@@ -161,10 +161,10 @@ async function allHands(b: Boss) {
 }
 
 // Dives at you, sends shockwaves both ways on impact, then floats back up.
-async function rightsizing(b: Boss) {
+async function doubleBooked(b: Boss) {
   const pod = b as Capsule;
   await pod.flyTo(b.player.x, 52, 190);
-  b.say('RIGHTSIZING!', 700);
+  b.say('DOUBLE-BOOKED!', 700);
   await b.telegraph(b.enraged ? 250 : 420);
   await pod.flyTo(b.player.x, FLOOR_Y - 20, b.enraged ? 300 : 240);
   sfx.boom();
@@ -178,9 +178,9 @@ export const ctoMan: BossDef = {
   id: 'cto',
   name: 'CTO MAN',
   manager: 'DANIEL',
-  intro: 'THIS REORG IS NON-NEGOTIABLE.',
+  intro: 'THIS MEETING IS NON-NEGOTIABLE.',
   defeatQuote: "LET'S NOT PUT THIS IN THE RETRO...",
-  credit: 'REORGS FOR FUN',
+  credit: 'BOOKS OVER YOUR LUNCH',
   look: {
     skin: 'e0ac69',
     hair: '6a4e2e',
@@ -198,6 +198,6 @@ export const ctoMan: BossDef = {
   final: true,
   phases: [
     { body: 'machine', weakness: 'ticket', patterns: [mandatoryAllHands, backlogDump, fiveYearRoadmap, sevZero] },
-    { body: 'capsule', weakness: 'calendar', patterns: [skipLevel, allHands, rightsizing] },
+    { body: 'capsule', weakness: 'calendar', patterns: [skipLevel, allHands, doubleBooked] },
   ],
 };
