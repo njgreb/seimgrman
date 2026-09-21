@@ -112,9 +112,17 @@ database), then `VITE_LEADERBOARD_URL=http://localhost:8787 npm run dev`.
 
 ## Discord notifications
 
-The game pings a Discord channel when someone **loads** it and when someone **finishes a run** (beaten or
-reorged, with score, rating, fight time, accuracy, hits taken, which managers went down, and whether they beat
-the final boss). Practice runs and dev builds say so in the footer.
+The game pings a Discord channel at four moments:
+
+| Ping | When |
+| --- | --- |
+| 🎮 loaded the game | the page opens |
+| 🕹️ a run has begun | START on the title screen |
+| ☠️ *(manager)* IS DOWN | each manager beaten: weapon earned, how many are left, run time, accuracy and hits so far |
+| 🏆 / 💀 run over | the score screen: score, rating, fight time, accuracy, hits taken, managers beaten, and whether the final boss fell |
+
+The final boss doesn't get its own ☠️ — the run card announces it with more detail. Practice runs and dev
+builds say so in the footer.
 
 Set one variable on the Railway service and it turns on:
 

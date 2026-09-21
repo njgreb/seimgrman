@@ -2,7 +2,7 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { type IncomingMessage, type ServerResponse, createServer } from 'node:http';
 import { scoreRun } from '../src/score.ts';
 import { connect, deleteScore, insertScore, migrate, topScores } from './db.ts';
-import { DISCORD_ENABLED, playerLoaded, runFinished } from './discord.ts';
+import { DISCORD_ENABLED, bossDefeated, playerLoaded, runFinished, runStarted } from './discord.ts';
 import { EVENTS_PER_MIN, rateLimited, validate, validateEvent } from './rules.ts';
 import { staticFiles } from './static.ts';
 
@@ -11,7 +11,7 @@ import { staticFiles } from './static.ts';
 //   GET    /health
 //   GET    /scores?limit=10          top scores for the current season
 //   POST   /scores                   { initials, stats, build } -> { entry, scores }
-//   POST   /events                   { type: 'load' | 'complete', ... } -> Discord ping, nothing stored
+//   POST   /events                   { type: 'load' | 'start' | 'boss' | 'complete', ... } -> Discord ping, nothing stored
 //   DELETE /scores/:id               admin only: Authorization: Bearer $ADMIN_TOKEN
 //
 // Env: PORT, DATABASE_URL, SEASON (bump to start a fresh board), ADMIN_TOKEN, ALLOWED_ORIGINS (comma-separated,
@@ -124,15 +124,28 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
     }
     const event = validateEvent(body);
     if (typeof event === 'string') return send(req, res, 422, { error: event });
-    if (event.type === 'load') playerLoaded(event.build, event.practice);
+    const { build, practice } = event;
+    if (event.type === 'load') playerLoaded(build, practice);
+    else if (event.type === 'start') runStarted(build, practice);
+    else if (event.type === 'boss')
+      bossDefeated({
+        stats: event.stats!,
+        boss: event.boss!,
+        bossManager: event.bossManager,
+        weapon: event.weapon,
+        defeatedCount: event.defeatedCount,
+        bossCount: event.bossCount,
+        build,
+        practice,
+      });
     else
       runFinished({
         stats: event.stats!,
         managersBeaten: event.managersBeaten,
         finalBoss: event.finalBoss,
         finalBossManager: event.finalBossManager,
-        build: event.build,
-        practice: event.practice,
+        build,
+        practice,
       });
     return send(req, res, 202, { ok: true, discord: true });
   }

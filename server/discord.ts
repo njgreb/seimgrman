@@ -1,6 +1,7 @@
 import { type RunStats, formatNumber, formatTime, rankFor, scoreRun } from '../src/score.ts';
 
-// Discord pings: someone loaded the game, someone finished a run. Off unless DISCORD_WEBHOOK_URL is set.
+// Discord pings: someone loaded the game, started a run, put a manager down, or finished. Off unless
+// DISCORD_WEBHOOK_URL is set.
 // The webhook lives here, not in the game: a URL shipped in the browser bundle is public and anyone who
 // views source can spam the channel with it. The game posts to /events and this relays it.
 
@@ -49,6 +50,47 @@ export function playerLoaded(build: string | null, practice: boolean): void {
     title: '🎮 A player loaded MEGA MANAGER',
     description: 'Someone just opened the game.',
     color: 0x3cbcfc,
+    footer: footer(build, practice),
+    timestamp: new Date().toISOString(),
+  });
+}
+
+export function runStarted(build: string | null, practice: boolean): void {
+  void post({
+    title: '🕹️ A run has begun',
+    description: 'Someone hit START and went after the managers.',
+    color: 0xf8d878,
+    footer: footer(build, practice),
+    timestamp: new Date().toISOString(),
+  });
+}
+
+// A manager went down mid-run. The final boss is left to runFinished, which says more.
+export function bossDefeated(event: {
+  stats: RunStats;
+  boss: string;
+  bossManager: string | null;
+  weapon: string | null;
+  defeatedCount: number;
+  bossCount: number;
+  build: string | null;
+  practice: boolean;
+}): void {
+  const { stats, boss, bossManager, weapon, defeatedCount, bossCount, build, practice } = event;
+  const accuracy = stats.shots ? stats.shotsLanded / stats.shots : 0;
+  const left = Math.max(0, bossCount - defeatedCount);
+  void post({
+    title: `☠️ ${boss} IS DOWN`,
+    description: bossManager ? `${bossManager} has been managed.` : undefined,
+    color: 0xa4e4fc,
+    fields: [
+      { name: 'Managers down', value: bossCount ? `${defeatedCount} of ${bossCount}` : String(defeatedCount), inline: true },
+      { name: 'Weapon earned', value: weapon ?? '—', inline: true },
+      { name: 'Still standing', value: left ? String(left) : 'none — HQ is next', inline: true },
+      { name: 'Run time so far', value: formatTime(stats.fightMs), inline: true },
+      { name: 'Accuracy so far', value: `${Math.round(accuracy * 100)}%`, inline: true },
+      { name: 'Hits taken so far', value: String(stats.hitsTaken), inline: true },
+    ],
     footer: footer(build, practice),
     timestamp: new Date().toISOString(),
   });

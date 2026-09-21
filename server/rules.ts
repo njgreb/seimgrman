@@ -37,15 +37,24 @@ export function validate(body: unknown): Submission | string {
 // Discord notification events (POST /events). Purely informational, so this is lenient where the score
 // rules are strict — a run that ends in a loss still gets announced — but every number and string that
 // reaches the webhook is clamped here.
+export type EventType = 'load' | 'start' | 'boss' | 'complete';
+
 export interface GameEvent {
-  type: 'load' | 'complete';
-  stats: RunStats | null;
+  type: EventType;
+  stats: RunStats | null; // mid-run so far for 'boss', final for 'complete'
+  boss: string | null; // the manager who just went down
+  bossManager: string | null;
+  weapon: string | null;
+  defeatedCount: number;
+  bossCount: number;
   managersBeaten: string[];
   finalBoss: string; // the roster lives in the game, so it names its own final boss
   finalBossManager: string;
   practice: boolean;
   build: string | null;
 }
+
+const TYPES: EventType[] = ['load', 'start', 'boss', 'complete'];
 
 const clamp = (n: unknown, max = MAX_COUNT): number =>
   typeof n === 'number' && Number.isFinite(n) ? Math.min(max, Math.max(0, Math.round(n))) : 0;
@@ -55,18 +64,25 @@ const isName = (n: unknown): n is string => typeof n === 'string' && NAME_PATTER
 
 export function validateEvent(body: unknown): GameEvent | string {
   if (!body || typeof body !== 'object') return 'bad request';
-  const { type, stats, managersBeaten, finalBoss, finalBossManager, practice, build } = body as Record<string, unknown>;
-  if (type !== 'load' && type !== 'complete') return 'unknown event';
+  const raw = body as Record<string, unknown>;
+  const type = TYPES.find((t) => t === raw.type);
+  if (!type) return 'unknown event';
   const event: GameEvent = {
     type,
     stats: null,
-    managersBeaten: Array.isArray(managersBeaten) ? managersBeaten.filter(isName).slice(0, 8) : [],
-    finalBoss: isName(finalBoss) ? finalBoss : 'THE FINAL BOSS',
-    finalBossManager: isName(finalBossManager) ? finalBossManager : 'the CTO',
-    practice: practice === true,
-    build: typeof build === 'string' ? build.slice(0, 40) : null,
+    boss: isName(raw.boss) ? raw.boss : null,
+    bossManager: isName(raw.bossManager) ? raw.bossManager : null,
+    weapon: isName(raw.weapon) ? raw.weapon : null,
+    defeatedCount: clamp(raw.defeatedCount, 8),
+    bossCount: clamp(raw.bossCount, 8),
+    managersBeaten: Array.isArray(raw.managersBeaten) ? raw.managersBeaten.filter(isName).slice(0, 8) : [],
+    finalBoss: isName(raw.finalBoss) ? raw.finalBoss : 'THE FINAL BOSS',
+    finalBossManager: isName(raw.finalBossManager) ? raw.finalBossManager : 'the CTO',
+    practice: raw.practice === true,
+    build: typeof raw.build === 'string' ? raw.build.slice(0, 40) : null,
   };
-  if (type === 'complete') {
+  if (type === 'boss' || type === 'complete') {
+    const stats = raw.stats;
     if (!stats || typeof stats !== 'object') return 'missing stats';
     const { fightMs, shots, shotsLanded, hitsTaken, finalBossDefeated } = stats as Record<string, unknown>;
     event.stats = {
@@ -77,6 +93,7 @@ export function validateEvent(body: unknown): GameEvent | string {
       finalBossDefeated: finalBossDefeated === true,
     };
   }
+  if (type === 'boss' && !event.boss) return 'missing boss';
   return event;
 }
 

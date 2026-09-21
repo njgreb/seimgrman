@@ -5,6 +5,7 @@ import { sfx } from '../audio/sfx';
 import { BOSSES } from '../data/bosses';
 import { PROMPTS, controlsHelp, onDeviceChange, onMenu, usingButtons } from '../input';
 import { LEADERBOARD_ENABLED } from '../leaderboard';
+import { notifyStarted } from '../notify';
 import { remaster } from '../remaster';
 import { progress } from '../state';
 import { starfield, text } from '../ui/text';
@@ -79,6 +80,7 @@ export class Title extends Phaser.Scene {
       if (action === 'select') toggleRemaster();
       if (action === 'start' || action === 'confirm') {
         sfx.select();
+        notifyStarted();
         this.scene.start('BossSelect');
       }
     });

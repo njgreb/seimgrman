@@ -9,6 +9,7 @@ import { Player } from '../entities/Player';
 import { Shot } from '../entities/Shot';
 import { spawnBoss } from '../entities/spawnBoss';
 import { PROMPTS, createControls, onMenu } from '../input';
+import { notifyBossDefeated } from '../notify';
 import { progress } from '../state';
 import { Hud } from '../ui/Hud';
 import { sleep, text } from '../ui/text';
@@ -271,6 +272,7 @@ export class Arena extends Phaser.Scene {
     sfx.death();
     progress.defeated.add(this.def.id);
     if (!progress.weapons.includes(this.def.reward)) progress.weapons.push(this.def.reward);
+    notifyBossDefeated(this.def);
     void this.outro();
   }
 
