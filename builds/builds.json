@@ -1,5 +1,10 @@
 [
   {
+    "sha": "542af24",
+    "subject": "Ping Discord when a player loads the game or finishes a run",
+    "date": "2026-09-20T21:02:44-05:00"
+  },
+  {
     "sha": "17ccb7a",
     "subject": "Bring CTO MAN's escape pod into shooting range",
     "date": "2026-09-16T11:45:02-05:00"
