@@ -9,6 +9,8 @@ const BASE = configured === 'self' ? window.location.origin : configured?.replac
 const TIMEOUT_MS = 6000;
 
 export const LEADERBOARD_ENABLED = !!BASE;
+// Same server, also used for the Discord pings in notify.ts.
+export const SERVER_URL = BASE;
 
 export interface Entry {
   id: number;

@@ -14,10 +14,12 @@ import { Results } from './scenes/Results';
 import { Title } from './scenes/Title';
 import { WeaponGet } from './scenes/WeaponGet';
 import { printConsoleEgg } from './egg';
+import { notifyLoaded } from './notify';
 import { pollGamepads } from './gamepad';
 import { TOUCH_ENABLED, mountTouchControls } from './touch';
 
 printConsoleEgg();
+notifyLoaded();
 mountTouchControls(document.getElementById('app')!);
 
 // Desktop: largest whole-number zoom that fits, so pixels stay square.

@@ -5,6 +5,7 @@ import { sfx } from '../audio/sfx';
 import { FINAL_BOSS } from '../data/bosses';
 import { PROMPTS, onMenu } from '../input';
 import { LEADERBOARD_ENABLED } from '../leaderboard';
+import { notifyCompleted } from '../notify';
 import { formatNumber, formatTime, rankFor, scoreRun } from '../score';
 import { progress } from '../state';
 import { sleep, starfield, text, typeOut } from '../ui/text';
@@ -32,6 +33,7 @@ export class Results extends Phaser.Scene {
 
   private async tally(): Promise<void> {
     const score = scoreRun(progress.stats);
+    notifyCompleted(); // before the tally animation, so a player who walks away still gets announced
 
     const title = text(this, WIDTH / 2, 14, '', { align: 'center', scale: 2, color: 'f8d878' });
     await typeOut(this, title, 'PERFORMANCE REVIEW', 40, sfx.tick);

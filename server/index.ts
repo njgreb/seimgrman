@@ -2,7 +2,8 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { type IncomingMessage, type ServerResponse, createServer } from 'node:http';
 import { scoreRun } from '../src/score.ts';
 import { connect, deleteScore, insertScore, migrate, topScores } from './db.ts';
-import { rateLimited, validate } from './rules.ts';
+import { DISCORD_ENABLED, playerLoaded, runFinished } from './discord.ts';
+import { EVENTS_PER_MIN, rateLimited, validate, validateEvent } from './rules.ts';
 import { staticFiles } from './static.ts';
 
 // MEGA MANAGER server: the built game plus the leaderboard API, so one Railway service hosts both.
@@ -10,10 +11,12 @@ import { staticFiles } from './static.ts';
 //   GET    /health
 //   GET    /scores?limit=10          top scores for the current season
 //   POST   /scores                   { initials, stats, build } -> { entry, scores }
+//   POST   /events                   { type: 'load' | 'complete', ... } -> Discord ping, nothing stored
 //   DELETE /scores/:id               admin only: Authorization: Bearer $ADMIN_TOKEN
 //
 // Env: PORT, DATABASE_URL, SEASON (bump to start a fresh board), ADMIN_TOKEN, ALLOWED_ORIGINS (comma-separated,
 // for the GitHub Pages copy; same-origin play needs none), RATE_LIMIT_PER_MIN (submissions per IP, default 10),
+// EVENT_RATE_LIMIT_PER_MIN (Discord pings per IP, default 20), DISCORD_WEBHOOK_URL (unset = no pings),
 // STATIC_DIR (built game, default ../dist; set empty to run the API alone).
 
 const PORT = Number(process.env.PORT ?? 8787);
@@ -107,6 +110,31 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
     const entry = await insertScore(query, { season: SEASON, total, ipHash: key, ...submission });
     console.log(`score ${entry.initials} ${entry.total} rank ${entry.rank} (id ${entry.id})`);
     return send(req, res, 201, { entry, scores: await topScores(query, SEASON, BOARD_SIZE) });
+  }
+
+  // Discord pings. Answered before the webhook call finishes: the game never waits on Discord.
+  if (method === 'POST' && url.pathname === '/events') {
+    if (!DISCORD_ENABLED) return send(req, res, 202, { ok: true, discord: false });
+    if (rateLimited(`event:${clientKey(req)}`, EVENTS_PER_MIN)) return send(req, res, 429, { error: 'slow down' });
+    let body: unknown;
+    try {
+      body = await readJson(req);
+    } catch {
+      return send(req, res, 400, { error: 'bad request' });
+    }
+    const event = validateEvent(body);
+    if (typeof event === 'string') return send(req, res, 422, { error: event });
+    if (event.type === 'load') playerLoaded(event.build, event.practice);
+    else
+      runFinished({
+        stats: event.stats!,
+        managersBeaten: event.managersBeaten,
+        finalBoss: event.finalBoss,
+        finalBossManager: event.finalBossManager,
+        build: event.build,
+        practice: event.practice,
+      });
+    return send(req, res, 202, { ok: true, discord: true });
   }
 
   const deleteMatch = url.pathname.match(/^\/scores\/(\d+)$/);

@@ -99,7 +99,8 @@ The GitHub Pages copy still works and talks to the same API cross-origin.
    build at `server/Dockerfile` and only redeploys when `server/`, `src/score.ts` or `src/config.ts` change.
 3. Service variables: `DATABASE_URL` = `${{Postgres.DATABASE_URL}}`, `ADMIN_TOKEN` = a long random string.
    Optional: `SEASON` (default `1`; change it to start a fresh board), `ALLOWED_ORIGINS` (default
-   `https://njgreb.github.io,http://localhost:5173`), `RATE_LIMIT_PER_MIN` (default 10 per IP).
+   `https://njgreb.github.io,http://localhost:5173`), `RATE_LIMIT_PER_MIN` (default 10 per IP),
+   `DISCORD_WEBHOOK_URL` (see below).
 4. Settings → Networking → **Generate Domain**, then point the game at it and redeploy the site:
    `gh variable set LEADERBOARD_URL --body https://<domain>` and `gh workflow run deploy.yml`.
 
@@ -108,6 +109,34 @@ The GitHub Pages copy still works and talks to the same API cross-origin.
 
 **Local dev:** `npm install --prefix server && npm run dev --prefix server` (no `DATABASE_URL` = in-memory
 database), then `VITE_LEADERBOARD_URL=http://localhost:8787 npm run dev`.
+
+## Discord notifications
+
+The game pings a Discord channel when someone **loads** it and when someone **finishes a run** (beaten or
+reorged, with score, rating, fight time, accuracy, hits taken, which managers went down, and whether they beat
+the final boss). Practice runs and dev builds say so in the footer.
+
+Set one variable on the Railway service and it turns on:
+
+```bash
+railway variables --set "DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/..."
+```
+
+Unset, the game sends the same events and the server drops them, so there is nothing to undo — and
+`EVENT_RATE_LIMIT_PER_MIN` (default 20 per IP) keeps a refresh loop from flooding the channel.
+
+The webhook deliberately lives on the server (`server/discord.ts`), not in the game: anything in the browser
+bundle is public, and a leaked webhook URL lets anyone post to the channel. The game only says *what happened*
+(`POST /events`), the server decides what Discord sees, and it re-scores the run itself rather than trusting a
+total from the browser. Since the pings ride on the leaderboard server, a build without `VITE_LEADERBOARD_URL`
+sends nothing.
+
+Try it without touching Discord:
+
+```bash
+DISCORD_WEBHOOK_URL=http://localhost:9911/hook npm run dev --prefix server   # point it at any local listener
+curl -X POST localhost:8787/events -H 'Content-Type: application/json' -d '{"type":"load"}'
+```
 
 ## Shipping it
 
@@ -127,6 +156,7 @@ src/bosses/     one file per boss: look, theme, attack patterns
 src/data/       boss list, weapons, shared types
 src/entities/   Player, Boss (AI helpers), Shot
 src/scenes/     Boot → Title → BossSelect → BossIntro → Arena (+Pause) → WeaponGet → Ending
+server/         leaderboard API, static hosting, Discord relay (discord.ts)
 tools/          pixelize.ts (AI art → palette-locked sprites), contact-sheet.ts
 art/raw/        drop AI-generated images here
 ```
