@@ -16,6 +16,9 @@ const TYPES: Record<string, string> = {
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
   '.txt': 'text/plain; charset=utf-8',
+  // the strategy guide: the PDF opens in the browser instead of downloading, the font loads for its page
+  '.pdf': 'application/pdf',
+  '.woff2': 'font/woff2',
 };
 
 export function staticFiles(root: string) {
