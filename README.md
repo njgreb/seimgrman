@@ -50,6 +50,21 @@ AI portraits: see [art/README.md](art/README.md).
 Toggle it on the title screen (R, or SELECT on touch and controllers; `?remaster` works too) and the boss intro,
 the HQ video call and the credits use it. The setting is remembered per device.
 
+## Strategy guide
+
+`guide/strategy-guide.pdf` is a one-page Nintendo Power style guide for printing and handing out: the four
+managers with their attacks and counters, the weakness loop, both CTO MAN phases, the scoring table and the
+controls. Every number in it comes from `src/config.ts` and the boss files, so it's worth regenerating after
+you retune a fight or swap a manager:
+
+```bash
+npm run guide     # guide/strategy-guide.html -> guide/strategy-guide.pdf (headless Chrome)
+```
+
+The script refreshes the mugshots from `public/assets/bosses/<id>/portrait16.png` (5x nearest-neighbour, so
+print keeps square pixels), renders at US Letter and fails loudly if the layout ever spills past one page.
+Set `CHROME=...` if Chrome isn't in the usual place. Edit the text in `guide/strategy-guide.html`.
+
 ## Dev shortcuts
 
 - `?boss=ticket` jumps straight into a fight (`?boss=cto&phase=2` starts the final fight at phase 2)

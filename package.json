@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "art": "tsx tools/pixelize.ts && tsx tools/contact-sheet.ts"
+    "art": "tsx tools/pixelize.ts && tsx tools/contact-sheet.ts",
+    "guide": "guide/render.sh"
   },
   "dependencies": {
     "phaser": "^3.90.0"
