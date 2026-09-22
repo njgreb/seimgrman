@@ -1,5 +1,10 @@
 [
   {
+    "sha": "2867cdb",
+    "subject": "Identify each sitting in the Discord pings: session id and IP",
+    "date": "2026-09-21T21:13:14-05:00"
+  },
+  {
     "sha": "944b0b7",
     "subject": "Ping Discord on run start and on each manager beaten",
     "date": "2026-09-21T11:07:41-05:00"
