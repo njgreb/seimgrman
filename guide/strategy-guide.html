@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MEGA MANAGER — Official Strategy Guide</title>
+<style>
+  @font-face {
+    font-family: 'Press Start 2P';
+    src: url('pressstart2p-latin.woff2') format('woff2');
+    font-weight: 400; font-style: normal;
+  }
+  @page { size: letter; margin: 0.28in; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0d0d10;
+    --paper: #f5f0e2;
+    --red: #a81000;
+    --hot: #f83800;
+    --gold: #f8d878;
+    --blue: #0058f8;
+    --sky: #3cbcfc;
+    --green: #007800;
+    --lime: #58d854;
+    --purple: #6844fc;
+    --lilac: #b8b8f8;
+    --salmon: #f87858;
+  }
+
+  html { width: 7.94in; }
+  body {
+    width: 7.94in; min-height: 10.44in;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 7.3pt;
+    line-height: 1.2;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .px { font-family: 'Press Start 2P', 'Courier New', monospace; }
+
+  /* ---------- masthead ---------- */
+  header {
+    background: #10001c;
+    border: 3px solid var(--ink);
+    padding: 8px 12px 9px;
+    display: flex; align-items: center; gap: 12px;
+    position: relative; overflow: hidden;
+  }
+  header::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 12% 120%, rgba(104,68,252,.55), transparent 60%),
+      radial-gradient(circle at 88% -30%, rgba(248,56,0,.5), transparent 58%);
+  }
+  .logo { position: relative; }
+  .logo .title {
+    font-size: 25px; letter-spacing: 1px; color: var(--sky);
+    text-shadow: 3px 3px 0 var(--red), 6px 6px 0 rgba(0,0,0,.55);
+  }
+  .logo .sub {
+    margin-top: 9px; color: var(--gold); font-size: 7.2px; letter-spacing: 1.6px; line-height: 1.5;
+  }
+  .burst {
+    position: relative; margin-left: auto; text-align: center;
+    background: var(--gold); color: var(--ink);
+    border: 3px solid var(--ink); padding: 7px 10px;
+    transform: rotate(4deg); box-shadow: 4px 4px 0 rgba(0,0,0,.5);
+  }
+  .burst b { font-size: 10px; display: block; letter-spacing: 1px; }
+  .burst span { font-size: 6px; display: block; margin-top: 5px; letter-spacing: 1px; }
+
+  /* ---------- section bars ---------- */
+  .bar {
+    background: var(--ink); color: var(--paper);
+    font-size: 9px; letter-spacing: 2px;
+    padding: 4px 8px; display: flex; align-items: center; gap: 8px;
+  }
+  .bar em { color: var(--gold); font-style: normal; font-size: 6.5px; letter-spacing: 1px; margin-left: auto; text-align: right; }
+  .hqbar { align-items: baseline; }
+  .hqbar em { font-size: 5.8px; letter-spacing: .5px; padding-left: 8px; }
+
+  /* ---------- boss roster ---------- */
+  .roster { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; flex: 0 0 auto; }
+  .boss {
+    border: 3px solid var(--ink); display: grid;
+    grid-template-columns: 86px 1fr; overflow: hidden;
+  }
+  .mug { position: relative; border-right: 3px solid var(--ink); display: flex; align-items: flex-end; }
+  .mug img {
+    width: 100%; display: block; image-rendering: pixelated;
+  }
+  .mug .no {
+    position: absolute; top: 0; left: 0;
+    background: var(--ink); color: var(--paper);
+    font-size: 8px; padding: 3px 4px;
+  }
+  .boss .body { padding: 4px 5px 5px; display: flex; flex-direction: column; }
+  .boss h3 { font-size: 11px; letter-spacing: .5px; }
+  .boss .who { font-size: 6.5px; letter-spacing: 1px; margin-top: 4px; opacity: .85; }
+  .quote { font-style: italic; font-size: 7pt; margin: 4px 0 5px; }
+  .tags { display: flex; gap: 4px; margin-bottom: 5px; }
+  .tag {
+    border: 2px solid var(--ink); padding: 2px 4px;
+    font-size: 5.6px; letter-spacing: .5px; line-height: 1.5;
+  }
+  .tag b { display: block; font-size: 6.6px; letter-spacing: 0; margin-top: 2px; }
+  .tag.weak { background: var(--gold); }
+  .tag.drop { background: var(--paper); }
+  ol.moves { list-style: none; font-size: 6.9pt; }
+  ol.moves li { margin-bottom: 1.5px; padding-left: 9px; position: relative; }
+  ol.moves li::before {
+    content: counter(m); counter-increment: m;
+    position: absolute; left: 0; top: .5px; font-size: 6px;
+    font-family: 'Press Start 2P', monospace;
+  }
+  ol.moves { counter-reset: m; }
+  ol.moves strong { letter-spacing: .2px; }
+
+  /* ---------- weakness loop ---------- */
+  .loop { border: 3px solid var(--ink); background: #fff; padding: 6px 9px 7px; }
+  .chain { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+  .link { display: flex; align-items: stretch; }
+  .node {
+    flex: 1; text-align: center; border: 2px solid var(--ink);
+    padding: 5px 4px; background: #fff;
+  }
+  .node .n { font-size: 7px; letter-spacing: .3px; white-space: nowrap; }
+  .node .w { font-size: 6.1pt; margin-top: 4px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+  .node .w b { font-family: 'Press Start 2P', monospace; font-size: 5.6px; letter-spacing: .3px; }
+  .hop {
+    width: 96px; flex: none; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 0 2px;
+  }
+  .hop .drop {
+    font-size: 5.2px; letter-spacing: .2px; text-align: center; line-height: 1.5;
+  }
+  .hop .a { font-size: 15px; line-height: .9; margin-top: 2px; color: var(--red); }
+  .wrap {
+    margin-top: 4px; border-top: 2px dashed var(--ink); padding-top: 4px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .wrap .lbl {
+    font-size: 5.6px; letter-spacing: .5px; background: var(--gold);
+    border: 2px solid var(--ink); padding: 3px 6px;
+  }
+  .loopnote { margin-top: 4px; font-size: 6.9pt; text-align: center; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+  /* ---------- lower grid ---------- */
+  .lower { display: grid; grid-template-columns: 1.52fr 1fr; gap: 6px; flex: 0 0 auto; }
+  .panel { border: 3px solid var(--ink); }
+  .panel .inner { padding: 6px 7px; }
+
+  .hq { background: #1c0308; color: var(--paper); display: flex; flex-direction: column; }
+  .hq .inner { flex: 1; display: flex; flex-direction: column; }
+  .hq .phase p { flex: 1; }
+  .hq .phase { border: 2px solid var(--paper); padding: 5px 6px; margin-bottom: 5px; }
+  .hq .phase:last-of-type { margin-bottom: 0; }
+  .hq .phase h4 { font-size: 7.5px; letter-spacing: .5px; color: var(--gold); }
+  .hq .phase .wk { font-size: 6px; letter-spacing: .5px; color: var(--sky); margin: 4px 0 4px; }
+  .hq .phase p { font-size: 6.9pt; }
+  .hq .atk { font-size: 6.4pt; margin-top: 4px; color: var(--lilac); }
+  .warn {
+    margin-top: 5px; background: var(--hot); color: #fff;
+    border: 2px solid var(--paper); padding: 4px 6px; font-size: 6.9pt;
+  }
+  .warn b { font-family: 'Press Start 2P', monospace; font-size: 6.5px; letter-spacing: 1px; }
+
+  .tips { background: var(--gold); display: flex; flex-direction: column; }
+  .tips .inner { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+  .tips ul { list-style: none; }
+  .tips li { position: relative; padding-left: 10px; margin-bottom: 2px; font-size: 6.75pt; }
+  .tips li::before { content: '\25B6'; position: absolute; left: 0; top: .4px; font-size: 5.5px; }
+  .tips li b { letter-spacing: .2px; }
+
+  /* ---------- score + controls ---------- */
+  .foot { display: grid; grid-template-columns: 1.52fr 1fr; gap: 6px; }
+  table { width: 100%; border-collapse: collapse; font-size: 6.9pt; }
+  th, td { border: 1.5px solid var(--ink); padding: 1.7px 5px; text-align: left; }
+  th { background: var(--ink); color: var(--paper); font-size: 5.8px; letter-spacing: 1px; font-family: 'Press Start 2P', monospace; font-weight: 400; }
+  td.pts { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tr.tot td { background: var(--sky); font-weight: bold; }
+  .ranks { margin-top: 4px; font-size: 6.0pt; }
+  .ranks b { letter-spacing: .3px; }
+
+  .ctrl { background: #10001c; color: var(--paper); }
+  .ctrl dl { display: grid; grid-template-columns: auto 1fr; gap: 2.5px 6px; font-size: 6.9pt; }
+  .ctrl dt { font-family: 'Press Start 2P', monospace; font-size: 6px; color: var(--gold); white-space: nowrap; }
+  .ctrl .also { margin-top: 5px; font-size: 6.4pt; color: var(--lilac); }
+  .url {
+    margin-top: 6px; background: var(--sky); color: var(--ink);
+    border: 2px solid var(--paper); text-align: center;
+    padding: 4px; font-size: 6.5px; letter-spacing: .5px;
+  }
+  .colophon { text-align: center; font-size: 6pt; opacity: .7; margin-top: 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="title px">MEGA MANAGER</div>
+    <div class="sub px">OFFICIAL STRATEGY GUIDE &nbsp;&#9642;&nbsp; AN ENGINEERING ONSITE ADVENTURE</div>
+  </div>
+  <div class="burst px">
+    <b>4 BOSSES</b>
+    <span>+ 1 CTO</span>
+  </div>
+</header>
+
+<div class="bar px">THE MANAGER ROSTER <em>28 HP EACH &#9642; WEAKNESS HITS FOR 4 &#9642; BUSTER HITS FOR 1</em></div>
+
+<section class="roster">
+
+  <article class="boss" style="background:#fdeceb">
+    <div class="mug" style="background:#2a0010">
+      <img src="art/sync.png" alt="PARKER MAN">
+      <div class="no px">01</div>
+    </div>
+    <div class="body">
+      <h3 class="px" style="color:#a81000">PARKER MAN</h3>
+      <div class="who px">PARKER &#9642; MEETINGS</div>
+      <div class="quote">&ldquo;LET'S CIRCLE BACK ON THAT.&rdquo;</div>
+      <div class="tags">
+        <div class="tag weak px">WEAK TO<b>ESCALATION WAVE</b></div>
+        <div class="tag drop px">DROPS<b>CALENDAR BLOCK</b></div>
+      </div>
+      <ol class="moves">
+        <li><strong>INVITE SPREAD</strong> &mdash; a 3-way fan of invites, twice. Aimed the instant it fires &mdash; keep moving through the flash.</li>
+        <li><strong>QUICK SYNC?</strong> &mdash; a slow clock that homes and freezes. Don't fight it &mdash; outrun it and it expires in 5s.</li>
+        <li><strong>RUNNING LONG</strong> &mdash; jumps to the far corner and rains invites from the ceiling. Watch the sky, not him.</li>
+      </ol>
+    </div>
+  </article>
+
+  <article class="boss" style="background:#e9f2fd">
+    <div class="mug" style="background:#001832">
+      <img src="art/ticket.png" alt="NATHAN MAN">
+      <div class="no px">02</div>
+    </div>
+    <div class="body">
+      <h3 class="px" style="color:#0058f8">NATHAN MAN</h3>
+      <div class="who px">NATHAN &#9642; THE BACKLOG</div>
+      <div class="quote">&ldquo;IS THERE A TICKET FOR THAT?&rdquo;</div>
+      <div class="tags">
+        <div class="tag weak px">WEAK TO<b>CALENDAR BLOCK</b></div>
+        <div class="tag drop px">DROPS<b>TICKET SPLIT</b></div>
+      </div>
+      <ol class="moves">
+        <li><strong>BACKLOG TOSS</strong> &mdash; lobs a ticket onto your spot; it bursts into two subtasks skimming the floor both ways. Jump the burst.</li>
+        <li><strong>SPRINT!</strong> &mdash; a long telegraph, then a dash across the room. Jump it &mdash; he can't turn mid-sprint.</li>
+        <li><strong>SCOPE CREEP</strong> &mdash; a slow piercing ticket that swells to 3.5x over 7s. Get past it early or not at all.</li>
+      </ol>
+    </div>
+  </article>
+
+  <article class="boss" style="background:#eef6e6">
+    <div class="mug" style="background:#16240a">
+      <img src="art/roadmap.png" alt="ANDY MAN">
+      <div class="no px">03</div>
+    </div>
+    <div class="body">
+      <h3 class="px" style="color:#007800">ANDY MAN</h3>
+      <div class="who px">ANDY &#9642; THE ROADMAP</div>
+      <div class="quote">&ldquo;THIS IS A TOP PRIORITY. ALSO THIS.&rdquo;</div>
+      <div class="tags">
+        <div class="tag weak px">WEAK TO<b>TICKET SPLIT</b></div>
+        <div class="tag drop px">DROPS<b>PIVOT BOOMERANG</b></div>
+      </div>
+      <ol class="moves">
+        <li><strong>PIVOT!</strong> &mdash; arrows that stall, reverse and come back &mdash; one at head height, one along the floor. Not over when it passes.</li>
+        <li><strong>Q1 Q2 Q3 Q4</strong> &mdash; four milestones hang, then drop in a random order. Read the order, stand in the gap.</li>
+        <li><strong>REORG!</strong> &mdash; teleports somewhere new, then an aimed 3-way spread. Reposition on the shout.</li>
+      </ol>
+    </div>
+  </article>
+
+  <article class="boss" style="background:#f1ecfd">
+    <div class="mug" style="background:#1a0020">
+      <img src="art/oncall.png" alt="BRENT MAN">
+      <div class="no px">04</div>
+    </div>
+    <div class="body">
+      <h3 class="px" style="color:#6844fc">BRENT MAN</h3>
+      <div class="who px">BRENT &#9642; THE CUSTOMER</div>
+      <div class="quote">&ldquo;THE CUSTOMER IS ON THE LINE.&rdquo;</div>
+      <div class="tags">
+        <div class="tag weak px">WEAK TO<b>PIVOT BOOMERANG</b></div>
+        <div class="tag drop px">DROPS<b>ESCALATION WAVE</b></div>
+      </div>
+      <ol class="moves">
+        <li><strong>QUICK ASK!</strong> &mdash; three fast aimed pages, then one more thing. Strafe &mdash; standing still eats all three.</li>
+        <li><strong>ESCALATION!</strong> &mdash; leaps onto you and lands two piercing shockwaves along the floor. Be airborne when he lands.</li>
+        <li><strong>LAUNCH DAY!</strong> &mdash; markers blink on the floor for 3/4s, then flame pillars. One marker is under you. Move.</li>
+      </ol>
+    </div>
+  </article>
+
+</section>
+
+<div class="loop px">
+  <div class="chain">
+    <div class="link">
+      <div class="node" style="background:#fdeceb"><div class="n px">PARKER MAN</div><div class="w">weak to <b>ESCALATION</b></div></div>
+      <div class="hop"><div class="drop">drops<br>CALENDAR BLOCK</div><div class="a">&#10230;</div></div>
+    </div>
+    <div class="link">
+      <div class="node" style="background:#e9f2fd"><div class="n px">NATHAN MAN</div><div class="w">weak to <b>CALENDAR</b></div></div>
+      <div class="hop"><div class="drop">drops<br>TICKET SPLIT</div><div class="a">&#10230;</div></div>
+    </div>
+    <div class="link">
+      <div class="node" style="background:#eef6e6"><div class="n px">ANDY MAN</div><div class="w">weak to <b>TICKET</b></div></div>
+      <div class="hop"><div class="drop">drops<br>PIVOT BOOMERANG</div><div class="a">&#10230;</div></div>
+    </div>
+    <div class="link">
+      <div class="node" style="background:#f1ecfd"><div class="n px">BRENT MAN</div><div class="w">weak to <b>PIVOT</b></div></div>
+    </div>
+  </div>
+  <div class="wrap">
+    <span class="a px" style="font-size:13px">&#8630;</span>
+    <span class="lbl px">BRENT DROPS ESCALATION WAVE &#9642; WHICH BEATS PARKER MAN &#9642; THE LOOP CLOSES</span>
+  </div>
+  <div class="loopnote">
+    <b>IT'S A CLOSED LOOP.</b> Every manager drops the weapon the next one fears, and the last drop arms you against the first &mdash;
+    so whoever you open with, you fight on the PR BUSTER alone. Pick your first victim, then never break the chain.
+  </div>
+</div>
+
+<div class="lower">
+  <section class="panel hq">
+    <div class="bar px hqbar" style="background:#f83800;color:#fff"><span style="white-space:nowrap">HQ &#9642; CTO MAN</span><em style="color:#fff">DANIEL &#9642; &ldquo;THIS MEETING IS NON-NEGOTIABLE.&rdquo;</em></div>
+    <div class="inner">
+      <div class="phase">
+        <h4 class="px">PHASE 1 &#9642; THE ALL-HANDS MACHINE</h4>
+        <div class="wk px">WEAK TO: TICKET SPLIT</div>
+        <p>The armor deflects everything. Only the cockpit takes damage, and only while its shutter is up between attacks &mdash; it sits at jump-shot height, so jump and fire into the gap the moment it opens.</p>
+        <div class="atk">MANDATORY ALL-HANDS &#9642; BACKLOG DUMP &#9642; 5-YEAR ROADMAP &#9642; EXEC ESCALATION</div>
+      </div>
+      <div class="phase">
+        <h4 class="px">PHASE 2 &#9642; THE ESCAPE POD</h4>
+        <div class="wk px">WEAK TO: CALENDAR BLOCK</div>
+        <p>He bails out into a pod that flies, teleports and ignores gravity. Between attacks it sinks into jump-shot range to taunt you &mdash; that hover is the whole window. Switch weapons before it drops.</p>
+        <div class="atk">SKIP-LEVEL! &#9642; ALL-HANDS! &#9642; DOUBLE-BOOKED!</div>
+      </div>
+      <div class="warn"><b>NO RETRIES AT HQ.</b> Lose to him &mdash; or quit the fight &mdash; and the run ends REORGED and gets scored anyway. Every manager you beat still counts.</div>
+    </div>
+  </section>
+
+  <section class="panel tips">
+    <div class="bar px">PRO TIPS</div>
+    <div class="inner">
+      <ul>
+        <li><b>Seven hits, not twenty-eight.</b> Every boss holds 28 HP. The weakness weapon takes 4 a hit; the PR BUSTER takes 1.</li>
+        <li><b>CRITICAL! is the receipt.</b> If that word isn't flashing, you brought the wrong weapon.</li>
+        <li><b>They enrage at half HP</b> &mdash; extra volleys, shorter gaps. The second half of a fight is not the first half.</li>
+        <li><b>Mashing is wasted.</b> A boss is invulnerable for 1/4 second after each hit, and every trigger pull that touches nothing costs you accuracy.</li>
+        <li><b>You can't get stranded.</b> Weapon energy refills one point every 0.7s, so the weakness weapon always comes back.</li>
+        <li><b>Spread beats spray.</b> Accuracy counts trigger pulls that landed &mdash; a 3-way shot counts once, whether one pellet hits or three.</li>
+        <li><b>Pause is free.</b> The fight clock stops, and intros, menus and boss select never counted.</li>
+        <li><b>Retries are not free.</b> Time, shots and hits carry across every attempt in the run, including the ones you lost.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<div class="foot">
+  <section class="panel">
+    <div class="bar px">PERFORMANCE REVIEW <em>ONE SCORE, SHOWN ONCE</em></div>
+    <div class="inner">
+      <table>
+        <tr><th>SCORING</th><th style="text-align:right">MAX</th></tr>
+        <tr><td>Fight time &mdash; 50 per second under 10:00</td><td class="pts">30,000</td></tr>
+        <tr><td>Accuracy &mdash; 300 per percent landed</td><td class="pts">30,000</td></tr>
+        <tr><td>Hits taken &mdash; 1,000 per hit under 30</td><td class="pts">30,000</td></tr>
+        <tr><td>Clear bonus &mdash; reaching HQ</td><td class="pts">10,000</td></tr>
+        <tr><td>Beating CTO MAN</td><td class="pts">30,000</td></tr>
+        <tr class="tot"><td>A PERFECT REVIEW</td><td class="pts">130,000</td></tr>
+      </table>
+      <div class="ranks"><b>RANKS:</b> INTERN &#9642; ENGINEER II 30K &#9642; SENIOR 45K &#9642; STAFF 60K &#9642; PRINCIPAL 75K &#9642; DISTINGUISHED 90K &#9642; <b>THE NEW CTO 115K</b></div>
+    </div>
+  </section>
+
+  <section class="panel ctrl">
+    <div class="bar px" style="background:#3cbcfc;color:#0d0d10">CONTROLS</div>
+    <div class="inner">
+      <dl>
+        <dt>&#8592; &#8594;</dt><dd>MOVE</dd>
+        <dt>Z / SPACE</dt><dd>JUMP</dd>
+        <dt>X / C</dt><dd>SHOOT</dd>
+        <dt>A / S</dt><dd>SWITCH WEAPON</dd>
+        <dt>ENTER</dt><dd>PAUSE &#9642; M MUTE</dd>
+      </dl>
+      <div class="also">On a phone an on-screen pad appears. Controllers work too &mdash; press a button to wake one up. Press R on the title screen for the 16-BIT REMASTER.</div>
+      <div class="url px">njgreb.github.io/seimgrman</div>
+    </div>
+  </section>
+</div>
+
+<div class="colophon">MEGA MANAGER &#9642; every manager is one file in src/bosses/ &#9642; beat DANIEL and the leaderboard remembers your initials</div>
+
+</body>
+</html>
