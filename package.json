@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "art": "tsx tools/pixelize.ts && tsx tools/contact-sheet.ts",
-    "guide": "guide/render.sh"
+    "guide": "tools/render-guide.sh"
   },
   "dependencies": {
     "phaser": "^3.90.0"

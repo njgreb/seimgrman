@@ -2,7 +2,7 @@
 # Renders strategy-guide.html to a one-page PDF with headless Chrome.
 # Chrome writes the file and then declines to exit, so we wait for the write and stop it ourselves.
 set -euo pipefail
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/../public/guide"
 
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
 [ -x "$CHROME" ] || { echo "Chrome not found at: $CHROME (set CHROME=...)" >&2; exit 1; }
@@ -13,7 +13,7 @@ if python3 -c "import PIL" 2>/dev/null; then
   python3 - <<'UPSCALE'
 from PIL import Image
 for b in ['sync', 'ticket', 'roadmap', 'oncall', 'cto']:
-    im = Image.open(f'../public/assets/bosses/{b}/portrait16.png').convert('RGBA')
+    im = Image.open(f'../assets/bosses/{b}/portrait16.png').convert('RGBA')
     im.resize((im.width * 5, im.height * 5), Image.NEAREST).save(f'art/{b}.png')
 UPSCALE
 fi

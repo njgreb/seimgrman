@@ -189,3 +189,37 @@ body.touch.pad-hidden { background: #000; }
 body.touch.pad-hidden .pad-side { display: none; }
 body.touch.pad-hidden #app { grid-template: 'screen' 1fr / 1fr; }
 body.touch.pad-hidden #screen { width: 100%; height: 100%; max-height: none; aspect-ratio: auto; }
+
+/* ---- strategy guide link (src/guide.ts) ----
+   Sits over the bottom of the screen area: letterbox on desktop, the empty strip under the
+   GAME OVER / REORGED text on a phone. Hidden until a run goes badly. */
+#guide-link {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 6px calc(5px + env(safe-area-inset-bottom));
+  background: rgba(0, 0, 16, 0.82);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+#guide-link.is-open { display: flex; }
+.guide-label { color: #bcbcbc; }
+.guide-btn {
+  color: #0d0d10;
+  background: #f8d878;
+  border: 2px solid #f8f8f8;
+  border-radius: 2px;
+  padding: 3px 7px;
+  text-decoration: none;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.guide-btn:active { background: #f8f8f8; }
+.guide-pdf { background: #3cbcfc; }

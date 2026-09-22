@@ -9,6 +9,7 @@ import { Player } from '../entities/Player';
 import { Shot } from '../entities/Shot';
 import { spawnBoss } from '../entities/spawnBoss';
 import { PROMPTS, createControls, onMenu } from '../input';
+import { offerGuide } from '../guide';
 import { notifyBossDefeated } from '../notify';
 import { progress } from '../state';
 import { Hud } from '../ui/Hud';
@@ -391,8 +392,10 @@ export class Arena extends Phaser.Scene {
     text(this, WIDTH / 2, 136, 'YOUR NEXT FREE SLOT', { align: 'center', depth: 91, color: 'bcbcbc' });
     text(this, WIDTH / 2, 148, 'IS IN Q3.', { align: 'center', depth: 91, color: 'bcbcbc' });
     await sleep(this, 1200);
+    text(this, WIDTH / 2, 166, 'STUCK? STRATEGY GUIDE BELOW', { align: 'center', depth: 91, color: 'a4e4fc' });
     const press = text(this, WIDTH / 2, 190, PROMPTS.start, { align: 'center', depth: 91, color: 'f8d878' });
     this.time.addEvent({ delay: 450, loop: true, callback: () => press.setVisible(!press.visible) });
+    offerGuide(this);
     onMenu(this, (action) => {
       if (action === 'start' || action === 'confirm') this.scene.start('Results');
     });
@@ -404,6 +407,8 @@ export class Arena extends Phaser.Scene {
     text(this, WIDTH / 2, 92, 'GAME OVER', { align: 'center', scale: 2, depth: 91, color: 'f83800' });
     text(this, WIDTH / 2, 116, "LET'S TAKE THIS OFFLINE.", { align: 'center', depth: 91 });
     text(this, WIDTH / 2, 136, PROMPTS.gameOver, { align: 'center', depth: 91, color: 'f8d878' });
+    text(this, WIDTH / 2, 170, 'STUCK? STRATEGY GUIDE BELOW', { align: 'center', depth: 91, color: 'a4e4fc' });
+    offerGuide(this);
     onMenu(this, (action) => {
       // multi-phase fights retry from the phase you reached
       if (action === 'confirm' || action === 'start') this.scene.restart({ bossId: this.def.id, phase: this.phase });
