@@ -13,6 +13,8 @@ function mount(): HTMLElement {
   if (bar) return bar;
   const el = document.createElement('div');
   el.id = 'guide-link';
+  // .page-ui keeps the on-screen controller's hands off it, so taps still become clicks (src/touch.ts)
+  el.className = 'page-ui';
   el.innerHTML = `
     <span class="guide-label">STUCK?</span>
     <a class="guide-btn" href="${HTML_URL}" target="_blank" rel="noopener">STRATEGY GUIDE</a>

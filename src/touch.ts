@@ -16,6 +16,11 @@ const DPAD_REACH = 1.35; // a thumb can start a little outside the drawn d-pad
 const ROUND_REACH = 1.5; // A/B hit circles overlap, so a thumb between them presses both
 const RECT_REACH = 12; // px of slop around the small buttons
 
+// Real DOM laid over the game (the strategy guide bar) has to stay tappable. The controller swallows
+// touches so the page can't scroll or zoom mid-fight, and preventDefault on touchstart means a tap never
+// becomes a click -- so anything marked .page-ui is left alone and keeps its default behaviour.
+const overPageUi = (target: EventTarget | null): boolean => target instanceof Element && !!target.closest('.page-ui');
+
 const MARKUP = `
   <div class="pad-side pad-left">
     <button class="pad-shoulder" data-btn="l">L</button>
@@ -94,6 +99,7 @@ export function mountTouchControls(app: HTMLElement): void {
   buttons.onPress((_, source) => source === 'gamepad' && setHidden(true));
 
   const onDown = (e: PointerEvent) => {
+    if (overPageUi(e.target)) return;
     e.preventDefault();
     sfx.unlock(); // browsers only allow audio to start from a user gesture
     if (document.body.classList.contains('pad-hidden')) {
@@ -134,6 +140,12 @@ export function mountTouchControls(app: HTMLElement): void {
 
   // Stop the browser from zooming, scrolling, selecting or long-press menus mid-fight.
   for (const type of ['touchstart', 'touchmove', 'gesturestart', 'dblclick', 'contextmenu']) {
-    document.addEventListener(type, (e) => e.preventDefault(), { passive: false });
+    document.addEventListener(
+      type,
+      (e) => {
+        if (!overPageUi(e.target)) e.preventDefault();
+      },
+      { passive: false },
+    );
   }
 }

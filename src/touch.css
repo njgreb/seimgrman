@@ -210,6 +210,8 @@ body.touch.pad-hidden #screen { width: 100%; height: 100%; max-height: none; asp
   letter-spacing: 0.06em;
 }
 #guide-link.is-open { display: flex; }
+/* the controller sets touch-action: none on the body; these have to stay tappable */
+#guide-link, .guide-btn { touch-action: manipulation; }
 .guide-label { color: #bcbcbc; }
 .guide-btn {
   color: #0d0d10;
