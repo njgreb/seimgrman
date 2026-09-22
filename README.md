@@ -121,8 +121,15 @@ The game pings a Discord channel at four moments:
 | ☠️ *(manager)* IS DOWN | each manager beaten: weapon earned, how many are left, run time, accuracy and hits so far |
 | 🏆 / 💀 run over | the score screen: score, rating, fight time, accuracy, hits taken, managers beaten, and whether the final boss fell |
 
-The final boss doesn't get its own ☠️ — the run card announces it with more detail. Practice runs and dev
-builds say so in the footer.
+The final boss doesn't get its own ☠️ — the run card announces it with more detail.
+
+Every ping's footer identifies the sitting: `session <uuid> · ip <address> · build <sha>`, plus a practice-run
+label for anything started from a dev shortcut. The session id is a UUID the game generates per page load and
+sends with each ping, so a channel full of pings reads back as individual sittings — at an onsite everyone
+shares one public IP, so the session id is what tells players apart. It lives in memory only: a refresh is a
+new id and nothing is stored on the device. The IP is the one the server sees on the request
+(`X-Forwarded-For` through Railway's proxy), never a value the game sends, so it can't be faked from the
+browser. Neither is written to the database; the `scores` table still stores only a salted hash.
 
 Set one variable on the Railway service and it turns on:
 

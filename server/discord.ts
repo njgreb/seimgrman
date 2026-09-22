@@ -41,26 +41,42 @@ async function post(embed: Embed): Promise<void> {
   }
 }
 
-const footer = (build: string | null, practice: boolean): { text: string } => ({
-  text: [practice ? 'practice run (dev shortcut, not ranked)' : null, `build ${build ?? 'unknown'}`].filter(Boolean).join(' · '),
+// Who the ping is about: the page-load id the game generated, the address the request came from, and
+// which build they're on. Every embed carries the same line so a run can be followed across pings.
+export interface Who {
+  session: string | null;
+  ip: string;
+  build: string | null;
+  practice: boolean;
+}
+
+const footer = (who: Who): { text: string } => ({
+  text: [
+    who.practice ? 'practice run (dev shortcut, not ranked)' : null,
+    `session ${who.session ?? 'unknown'}`,
+    `ip ${who.ip}`,
+    `build ${who.build ?? 'unknown'}`,
+  ]
+    .filter(Boolean)
+    .join(' · '),
 });
 
-export function playerLoaded(build: string | null, practice: boolean): void {
+export function playerLoaded(who: Who): void {
   void post({
     title: '🎮 A player loaded MEGA MANAGER',
     description: 'Someone just opened the game.',
     color: 0x3cbcfc,
-    footer: footer(build, practice),
+    footer: footer(who),
     timestamp: new Date().toISOString(),
   });
 }
 
-export function runStarted(build: string | null, practice: boolean): void {
+export function runStarted(who: Who): void {
   void post({
     title: '🕹️ A run has begun',
     description: 'Someone hit START and went after the managers.',
     color: 0xf8d878,
-    footer: footer(build, practice),
+    footer: footer(who),
     timestamp: new Date().toISOString(),
   });
 }
@@ -73,10 +89,9 @@ export function bossDefeated(event: {
   weapon: string | null;
   defeatedCount: number;
   bossCount: number;
-  build: string | null;
-  practice: boolean;
+  who: Who;
 }): void {
-  const { stats, boss, bossManager, weapon, defeatedCount, bossCount, build, practice } = event;
+  const { stats, boss, bossManager, weapon, defeatedCount, bossCount, who } = event;
   const accuracy = stats.shots ? stats.shotsLanded / stats.shots : 0;
   const left = Math.max(0, bossCount - defeatedCount);
   void post({
@@ -91,7 +106,7 @@ export function bossDefeated(event: {
       { name: 'Accuracy so far', value: `${Math.round(accuracy * 100)}%`, inline: true },
       { name: 'Hits taken so far', value: String(stats.hitsTaken), inline: true },
     ],
-    footer: footer(build, practice),
+    footer: footer(who),
     timestamp: new Date().toISOString(),
   });
 }
@@ -101,10 +116,9 @@ export function runFinished(event: {
   managersBeaten: string[];
   finalBoss: string;
   finalBossManager: string;
-  build: string | null;
-  practice: boolean;
+  who: Who;
 }): void {
-  const { stats, managersBeaten, finalBoss, finalBossManager, build, practice } = event;
+  const { stats, managersBeaten, finalBoss, finalBossManager, who } = event;
   // The server does the math here too; a total from the browser is never trusted.
   const score = scoreRun(stats);
   const won = stats.finalBossDefeated;
@@ -123,7 +137,7 @@ export function runFinished(event: {
       { name: 'Hits taken', value: String(stats.hitsTaken), inline: true },
       { name: 'Managers beaten', value: managersBeaten.length ? managersBeaten.join(', ') : 'none' },
     ],
-    footer: footer(build, practice),
+    footer: footer(who),
     timestamp: new Date().toISOString(),
   });
 }

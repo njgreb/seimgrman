@@ -57,11 +57,15 @@ async function readJson(req: IncomingMessage): Promise<unknown> {
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));
 }
 
-// Railway's proxy puts the real client first in X-Forwarded-For. Only a hash is stored.
-function clientKey(req: IncomingMessage): string {
+// Railway's proxy puts the real client first in X-Forwarded-For.
+function clientIp(req: IncomingMessage): string {
   const forwarded = String(req.headers['x-forwarded-for'] ?? '').split(',')[0].trim();
-  const ip = forwarded || req.socket.remoteAddress || 'unknown';
-  return createHash('sha256').update(`${ADMIN_TOKEN}:${ip}`).digest('hex').slice(0, 16);
+  return forwarded || req.socket.remoteAddress || 'unknown';
+}
+
+// What the scores table stores instead of the address itself.
+function clientKey(req: IncomingMessage): string {
+  return createHash('sha256').update(`${ADMIN_TOKEN}:${clientIp(req)}`).digest('hex').slice(0, 16);
 }
 
 function isAdmin(req: IncomingMessage): boolean {
@@ -124,9 +128,10 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
     }
     const event = validateEvent(body);
     if (typeof event === 'string') return send(req, res, 422, { error: event });
-    const { build, practice } = event;
-    if (event.type === 'load') playerLoaded(build, practice);
-    else if (event.type === 'start') runStarted(build, practice);
+    // The game never sends its own IP; the real one comes off the request, where it can't be faked.
+    const who = { session: event.session, ip: clientIp(req), build: event.build, practice: event.practice };
+    if (event.type === 'load') playerLoaded(who);
+    else if (event.type === 'start') runStarted(who);
     else if (event.type === 'boss')
       bossDefeated({
         stats: event.stats!,
@@ -135,8 +140,7 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
         weapon: event.weapon,
         defeatedCount: event.defeatedCount,
         bossCount: event.bossCount,
-        build,
-        practice,
+        who,
       });
     else
       runFinished({
@@ -144,8 +148,7 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
         managersBeaten: event.managersBeaten,
         finalBoss: event.finalBoss,
         finalBossManager: event.finalBossManager,
-        build,
-        practice,
+        who,
       });
     return send(req, res, 202, { ok: true, discord: true });
   }

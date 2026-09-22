@@ -9,9 +9,27 @@ import { progress } from './state';
 // happened; the webhook itself lives there (server/discord.ts), out of reach of anyone reading this
 // bundle. No server configured (no VITE_LEADERBOARD_URL) means no pings.
 
+// One id per page load, on every ping, so a channel full of pings can be read back as individual
+// sittings — at an onsite everyone shares one public IP, so this is what actually tells players apart.
+// It lives in memory only: a refresh is a new id, and nothing is stored on the device.
+const SESSION_ID = ((): string => {
+  try {
+    // randomUUID needs a secure context (https or localhost); the fallback keeps file:// and old browsers working.
+    return crypto.randomUUID();
+  } catch {
+    return Array.from({ length: 8 }, () => Math.floor(Math.random() * 65536).toString(16).padStart(4, '0')).join('');
+  }
+})();
+
 function send(body: Record<string, unknown>): void {
   if (!SERVER_URL) return;
-  const payload = JSON.stringify({ ...body, build: import.meta.env.VITE_BUILD_SHA ?? 'dev', practice: progress.practice });
+  // The player's IP isn't in here: the server reads the real one off the request, where it can't be faked.
+  const payload = JSON.stringify({
+    ...body,
+    session: SESSION_ID,
+    build: import.meta.env.VITE_BUILD_SHA ?? 'dev',
+    practice: progress.practice,
+  });
   try {
     // keepalive: the ping still goes out if the tab is closed a moment later.
     void fetch(`${SERVER_URL}/events`, {
